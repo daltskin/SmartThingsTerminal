@@ -1,6 +1,4 @@
-﻿using NStack;
-using SmartThingsNet.Model;
-using SmartThingsTerminal;
+﻿using SmartThingsNet.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +28,7 @@ namespace SmartThingsTerminal.Scenarios
         public override void Setup()
         {
             var statusBar = new StatusBar(new StatusItem[] {
-                new StatusItem(Key.ControlR, "~CTRL-R~ Refresh Data", () => RefreshScreen()),
+                //new StatusItem(Key.ControlR, "~CTRL-R~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.ControlQ, "~CTRL-Q~ Back/Quit", () => Quit())
             });
 
@@ -75,7 +73,7 @@ namespace SmartThingsTerminal.Scenarios
                 {
                     ClearClass(CurrentView);
                     var selectedItem = _viewScenes.Values.ToArray()[ClassListView.SelectedItem];
-                    string json = selectedItem.ToJson().Replace("\r", "");
+                    string json = selectedItem.ToJson();
                     CurrentView = CreateJsonView(json);
                 };
             }

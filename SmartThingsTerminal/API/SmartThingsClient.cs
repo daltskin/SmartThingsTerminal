@@ -3,12 +3,15 @@ using SmartThingsNet.Client;
 using SmartThingsNet.Model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace SmartThingsTerminal
 {
-    public class SmartThingsClient
+    public class SmartThingsClient : IDisposable
     {
+        private bool _disposedValue;
+
         private PagedDevices _allDevices;
         private PagedLocations _allLocations;
         private PagedRooms _allRooms;
@@ -33,13 +36,9 @@ namespace SmartThingsTerminal
 
         public SmartThingsClient(string accessToken)
         {
-            if (accessToken == null)
-            {
-                throw new ArgumentNullException(accessToken);
-            }
-
             var configuration = new Configuration();
-            configuration.AccessToken = accessToken;
+            configuration.AccessToken = accessToken ?? throw new ArgumentNullException(accessToken);
+            //configuration.BasePath = "https://graph-eu01-euwest1.api.smartthings.com/v1";
 
             _devicesApi = new DevicesApi(configuration);
             _locationsApi = new LocationsApi(configuration);
@@ -71,7 +70,14 @@ namespace SmartThingsTerminal
         {
             if (_allApps == null)
             {
-                _allApps = _appsApi.ListApps();
+                try
+                {
+                    _allApps = _appsApi.ListApps();
+                }
+                catch (Exception exp)
+                {
+                    Debug.WriteLine(exp);
+                }
             }
             return _allApps;
         }
@@ -82,18 +88,32 @@ namespace SmartThingsTerminal
             {
                 if (locationId != null)
                 {
-                    _allInstalledApps = _installedAppsApi.ListInstallations(locationId);
+                    try
+                    {
+                        _allInstalledApps = _installedAppsApi.ListInstallations(locationId);
+                    }
+                    catch (Exception exp)
+                    {
+                        Debug.WriteLine(exp);
+                    }
                 }
                 else
                 {
                     _allInstalledApps = new PagedInstalledApps();
                     foreach (var location in GetAllLocations().Items)
                     {
-                        var locationApps = _installedAppsApi.ListInstallations(location.LocationId.ToString());
-                        if (locationApps.Items?.Count > 0)
+                        try
                         {
-                            _allInstalledApps.Items ??= new List<InstalledApp>();
-                            _allInstalledApps.Items.AddRange(locationApps.Items);
+                            var locationApps = _installedAppsApi.ListInstallations(location.LocationId.ToString());
+                            if (locationApps.Items?.Count > 0)
+                            {
+                                _allInstalledApps.Items ??= new List<InstalledApp>();
+                                _allInstalledApps.Items.AddRange(locationApps.Items);
+                            }
+                        }
+                        catch (Exception exp)
+                        {
+                            Debug.WriteLine(exp);
                         }
                     }
                 }
@@ -107,18 +127,32 @@ namespace SmartThingsTerminal
             {
                 if (appId != null)
                 {
-                    _allSubscriptions = _subscriptionsApi.ListSubscriptions(appId);
+                    try
+                    {
+                        _allSubscriptions = _subscriptionsApi.ListSubscriptions(appId);
+                    }
+                    catch (Exception exp)
+                    {
+                        Debug.WriteLine(exp);
+                    }
                 }
                 else
                 {
                     _allSubscriptions = new PagedSubscriptions();
                     foreach (var app in GetAllInstalledApps().Items)
                     {
-                        var appSubscriptions = _subscriptionsApi.ListSubscriptions(app.InstalledAppId.ToString());
-                        if (appSubscriptions.Items?.Count > 0)
+                        try
                         {
-                            _allSubscriptions.Items ??= new List<Subscription>();
-                            _allSubscriptions.Items.AddRange(appSubscriptions.Items);
+                            var appSubscriptions = _subscriptionsApi.ListSubscriptions(app.InstalledAppId.ToString());
+                            if (appSubscriptions.Items?.Count > 0)
+                            {
+                                _allSubscriptions.Items ??= new List<Subscription>();
+                                _allSubscriptions.Items.AddRange(appSubscriptions.Items);
+                            }
+                        }
+                        catch (Exception exp)
+                        {
+                            Debug.WriteLine(exp);
                         }
                     }
                 }
@@ -130,7 +164,14 @@ namespace SmartThingsTerminal
         {
             if (_allDevices == null)
             {
-                _allDevices = await _devicesApi.GetDevicesAsync();
+                try
+                {
+                    _allDevices = await _devicesApi.GetDevicesAsync();
+                }
+                catch (Exception exp)
+                {
+                    Debug.WriteLine(exp);
+                }
             }
             return _allDevices;
         }
@@ -139,7 +180,14 @@ namespace SmartThingsTerminal
         {
             if (_allDevices == null)
             {
-                _allDevices = _devicesApi.GetDevices();
+                try
+                {
+                    _allDevices = _devicesApi.GetDevices();
+                }
+                catch (Exception exp)
+                {
+                    Debug.WriteLine(exp);
+                }
             }
             return _allDevices;
         }
@@ -148,7 +196,14 @@ namespace SmartThingsTerminal
         {
             if (_allDeviceProfiles == null)
             {
-                _allDeviceProfiles = _deviceProfilesApi.ListDeviceProfiles();
+                try
+                {
+                    _allDeviceProfiles = _deviceProfilesApi.ListDeviceProfiles();
+                }
+                catch (Exception exp)
+                {
+                    Debug.WriteLine(exp);
+                }
             }
             return _allDeviceProfiles;
         }
@@ -166,7 +221,14 @@ namespace SmartThingsTerminal
         {
             if (_allLocations == null)
             {
-                _allLocations = _locationsApi.ListLocations();
+                try
+                {
+                    _allLocations = _locationsApi.ListLocations();
+                }
+                catch (Exception exp)
+                {
+                    Debug.WriteLine(exp);
+                }
             }
             return _allLocations;
         }
@@ -175,16 +237,46 @@ namespace SmartThingsTerminal
         {
             if (_allRooms == null)
             {
-                _allRooms = await _roomsApi.ListRoomsAsync(locationId);
+                try
+                {
+                    _allRooms = await _roomsApi.ListRoomsAsync(locationId);
+                }
+                catch (Exception exp)
+                {
+                    Debug.WriteLine(exp);
+                }
             }
             return _allRooms;
         }
 
-        public PagedRooms GetAllRooms(string locationId)
+        public PagedRooms GetAllRooms(string locationId = null)
         {
             if (_allRooms == null)
             {
-                _allRooms = _roomsApi.ListRooms(locationId);
+                if (locationId != null)
+                {
+                    try
+                    {
+                        _allRooms = _roomsApi.ListRooms(locationId);
+                    }
+                    catch (Exception exp)
+                    {
+                        Debug.WriteLine(exp);
+                    }
+                }
+                else
+                {
+                    _allRooms = new PagedRooms();
+                    foreach (var location in GetAllLocations().Items)
+                    {
+                        var locationRooms = _roomsApi.ListRooms(location.LocationId.ToString());
+                        if (locationRooms.Items?.Count > 0)
+                        {
+                            _allRooms.Items ??= new List<SmartThingsNet.Model.Room>();
+                            _allRooms.Items.AddRange(locationRooms.Items);
+                        }
+                    }
+                }
             }
             return _allRooms;
         }
@@ -193,7 +285,14 @@ namespace SmartThingsTerminal
         {
             if (_allScenes == null)
             {
-                _allScenes = _scenesApi.ListScenes(locationId);
+                try
+                {
+                    _allScenes = _scenesApi.ListScenes(locationId);
+                }
+                catch (Exception exp)
+                {
+                    Debug.WriteLine(exp);
+                }
             }
             return _allScenes;
         }
@@ -204,18 +303,32 @@ namespace SmartThingsTerminal
             {
                 if (locationId != null)
                 {
-                    _allRules = _rulesApi.ListRules(locationId);
+                    try
+                    {
+                        _allRules = _rulesApi.ListRules(locationId);
+                    }
+                    catch (Exception exp)
+                    {
+                        Debug.WriteLine(exp);
+                    }
                 }
                 else
                 {
                     _allRules = new PagedRules();
                     foreach (var location in GetAllLocations().Items)
                     {
-                        var locationRules = _rulesApi.ListRules(location.LocationId.ToString());
-                        if (locationRules.Items?.Count > 0)
+                        try
                         {
-                            _allRules.Items ??= new List<SmartThingsNet.Model.Rule>();
-                            _allRules.Items.AddRange(locationRules.Items);
+                            var locationRules = _rulesApi.ListRules(location.LocationId.ToString());
+                            if (locationRules.Items?.Count > 0)
+                            {
+                                _allRules.Items ??= new List<SmartThingsNet.Model.Rule>();
+                                _allRules.Items.AddRange(locationRules.Items);
+                            }
+                        }
+                        catch (Exception exp)
+                        {
+                            Debug.WriteLine(exp);
                         }
                     }
                 }
@@ -229,23 +342,75 @@ namespace SmartThingsTerminal
             {
                 if (appId != null)
                 {
-                    _allSchedules = _schedulesApi.GetSchedules(appId);
+                    try
+                    {
+                        _allSchedules = _schedulesApi.GetSchedules(appId);
+                    }
+                    catch (Exception exp)
+                    {
+                        Debug.WriteLine(exp);
+                    }
                 }
                 else
                 {
                     _allSchedules = new PagedSchedules();
                     foreach (var app in GetAllInstalledApps().Items)
                     {
-                        var appSchedules = _schedulesApi.GetSchedules(app.InstalledAppId.ToString());
-                        if (appSchedules.Items?.Count > 0)
+                        try
                         {
-                            _allSchedules.Items ??= new List<Schedule>();
-                            _allSchedules.Items.AddRange(appSchedules.Items);
+                            var appSchedules = _schedulesApi.GetSchedules(app.InstalledAppId.ToString());
+                            if (appSchedules.Items?.Count > 0)
+                            {
+                                _allSchedules.Items ??= new List<Schedule>();
+                                _allSchedules.Items.AddRange(appSchedules.Items);
+                            }
+                        }
+                        catch (Exception exp)
+                        {
+                            Debug.WriteLine(exp);
                         }
                     }
                 }
             }
             return _allSchedules;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _allDevices = null;
+                    _allLocations = null;
+                    _allRooms = null;
+                    _allScenes = null;
+                    _allRules = null;
+                    _allSchedules = null;
+                    _allApps = null;
+                    _allSubscriptions = null; 
+                    _allInstalledApps = null;
+                    _allDeviceProfiles = null;
+
+                    _devicesApi = null;
+                    _locationsApi = null;
+                    _roomsApi = null;
+                    _scenesApi = null;
+                    _rulesApi = null;
+                    _schedulesApi = null;
+                    _appsApi = null;
+                    _subscriptionsApi = null;
+                    _installedAppsApi = null;
+                    _deviceProfilesApi = null;
+                }
+                _disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

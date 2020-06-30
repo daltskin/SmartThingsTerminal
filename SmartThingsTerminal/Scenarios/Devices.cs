@@ -1,5 +1,4 @@
 ﻿using SmartThingsNet.Model;
-using SmartThingsTerminal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +14,7 @@ namespace SmartThingsTerminal.Scenarios
         FrameView _deviceDetailsFrame;
         FrameView _deviceLocationFrame;
 
-        public override void Init(Toplevel top, ColorScheme colorScheme, SmartThingsClient SmartThingsTerminalent)
+        public override void Init(Toplevel top, ColorScheme colorScheme, SmartThingsClient smartThingsClient)
         {
             Application.Init();
 
@@ -24,13 +23,13 @@ namespace SmartThingsTerminal.Scenarios
             {
                 Top = Application.Top;
             }
-            STClient = SmartThingsTerminalent;
+            STClient = smartThingsClient;
         }
 
         public override void Setup()
         {
             var statusBar = new StatusBar(new StatusItem[] {
-                new StatusItem(Key.ControlR, "~CTRL-R~ Refresh Data", () => RefreshScreen()),
+                //new StatusItem(Key.ControlR, "~CTRL-R~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.ControlQ, "~CTRL-Q~ Back/Quit", () => Quit())
             });
 
@@ -66,7 +65,7 @@ namespace SmartThingsTerminal.Scenarios
                 Width = Dim.Fill(0),
                 Height = Dim.Fill(), // for status bar
                 AllowsMarking = false,
-                ColorScheme = Colors.TopLevel,
+                ColorScheme = Colors.TopLevel
             };
 
             if (_viewDevices.Keys.Count > 0)
@@ -80,7 +79,7 @@ namespace SmartThingsTerminal.Scenarios
                     ClearClass(CurrentView);
 
                     var selectedDevice = _viewDevices.Values.ToArray()[ClassListView.SelectedItem];
-                    string json = selectedDevice.ToJson().Replace("\r", "");
+                    string json = selectedDevice.ToJson();
                     CurrentView = CreateJsonView(json);
                     UpdateSettings(selectedDevice);
                 };

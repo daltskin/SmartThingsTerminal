@@ -1,5 +1,4 @@
 ﻿using NStack;
-using SmartThingsTerminal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +13,6 @@ namespace SmartThingsTerminal
         public Toplevel Top { get; set; }
 
         public Window Win { get; set; }
-
-        //public string AccessToken { get; set; }
 
         public SmartThingsClient STClient { get; set; }
 
@@ -39,7 +36,9 @@ namespace SmartThingsTerminal
                 Height = Dim.Fill()
             };
 
-            view.Text = ustring.Make(json);
+            string formattedJson = json.Replace("\r", "");
+
+            view.Text = ustring.Make(formattedJson);
             view.ReadOnly = true;
 
             // Set the colorscheme to make it stand out
@@ -89,8 +88,15 @@ namespace SmartThingsTerminal
         {
             ErrorView = null;
             STClient.ResetData();
+
             Top.Clear();
+            HostPane.Clear();
+            ClassListView.Clear();
+            LeftPane.Clear();
+            SettingsPane.Clear();
             Setup();
+
+            Application.Refresh();
         }
 
         /// <summary>
@@ -287,7 +293,7 @@ namespace SmartThingsTerminal
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects)
+                    STClient.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

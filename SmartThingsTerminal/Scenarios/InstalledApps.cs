@@ -6,11 +6,11 @@ using Terminal.Gui;
 
 namespace SmartThingsTerminal.Scenarios
 {
-    [ScenarioMetadata(Name: "Locations", Description: "SmartThings locations")]
-    [ScenarioCategory("Locations")]
-    class Locations : Scenario
+    [ScenarioMetadata(Name: "InstalledApps", Description: "SmartThings installed applications")]
+    [ScenarioCategory("Installed Apps")]
+    class InstalledApps : Scenario
     {
-        Dictionary<string, Location> _viewLocations = new Dictionary<string, Location>();
+        Dictionary<string, InstalledApp> _viewInstalledApps = new Dictionary<string, InstalledApp>();
 
         public override void Init(Toplevel top, ColorScheme colorScheme, SmartThingsClient SmartThingsTerminalent)
         {
@@ -32,7 +32,7 @@ namespace SmartThingsTerminal.Scenarios
                 new StatusItem(Key.ControlQ, "~CTRL-Q~ Back/Quit", () => Quit())
             });
 
-            LeftPane = new Window("Locations")
+            LeftPane = new Window("Installed Apps")
             {
                 X = 0,
                 Y = 0, // for menu
@@ -44,11 +44,11 @@ namespace SmartThingsTerminal.Scenarios
 
             try
             {
-                if (STClient.GetAllLocations().Items?.Count > 0)
+                if (STClient.GetAllInstalledApps().Items?.Count > 0)
                 {
-                    _viewLocations = STClient.GetAllLocations().Items
-                        .OrderBy(t => t.Name)
-                        .Select(t => new KeyValuePair<string, Location>(t.Name, t))
+                    _viewInstalledApps = STClient.GetAllInstalledApps().Items
+                        .OrderBy(t => t.DisplayName)
+                        .Select(t => new KeyValuePair<string, InstalledApp>(t.DisplayName, t))
                         .ToDictionary(t => t.Key, t => t.Value);
                 }
             }
@@ -57,7 +57,7 @@ namespace SmartThingsTerminal.Scenarios
                 SetErrorView($"No data returned from API:{Environment.NewLine}{exp.Message}");
             }
 
-            ClassListView = new ListView(_viewLocations.Keys?.ToList())
+            ClassListView = new ListView(_viewInstalledApps.Keys?.ToList())
             {
                 X = 0,
                 Y = 0,
@@ -67,14 +67,13 @@ namespace SmartThingsTerminal.Scenarios
                 ColorScheme = Colors.TopLevel,
             };
 
-            if (_viewLocations.Keys.Count > 0)
+            if (_viewInstalledApps.Keys.Count > 0)
             {
                 ClassListView.SelectedItemChanged += (args) =>
                 {
                     ClearClass(CurrentView);
-                    var selectedItem = _viewLocations.Values.ToArray()[ClassListView.SelectedItem];
-                    string json = selectedItem.ToJson();
-                    CurrentView = CreateJsonView(json);
+                    var selectedItem = _viewInstalledApps.Values.ToArray()[ClassListView.SelectedItem];
+                    CurrentView = CreateJsonView(selectedItem.ToJson());
                 };
             }
             LeftPane.Add(ClassListView);
@@ -91,9 +90,9 @@ namespace SmartThingsTerminal.Scenarios
             Top.Add(LeftPane, HostPane);
             Top.Add(statusBar);
 
-            if (_viewLocations.Count > 0)
+            if (_viewInstalledApps.Count > 0)
             {
-                CurrentView = CreateJsonView(_viewLocations?.FirstOrDefault().Value?.ToJson());
+                CurrentView = CreateJsonView(_viewInstalledApps?.FirstOrDefault().Value?.ToJson());
             }
 
             DisplayErrorView();

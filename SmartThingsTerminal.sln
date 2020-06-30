@@ -13,6 +13,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "Terminal.Gui\Terminal.Gui.csproj", "{007B0279-3E5F-440D-A5BC-522415D5ABF1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{0A86A10D-DCD1-4C61-BF22-419BD955333B}"
+	ProjectSection(SolutionItems) = preProject
+		docs\devices.png = docs\devices.png
+		docs\home.png = docs\home.png
+		docs\pat.png = docs\pat.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +37,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0A86A10D-DCD1-4C61-BF22-419BD955333B} = {8AB9BD79-B877-4441-B6A4-88F1F71EE4E2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {67A7EDCD-7026-4DEE-A90D-4758DF431428}
