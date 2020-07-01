@@ -16,7 +16,7 @@ jobs:
     
     strategy:
       matrix:
-        runtime: ["win-arm", "win-arm64", "win10-x86"]
+        runtime: ["win-x86", "win-arm", "win-arm64", "win7-x64", "win7-x86", "win81-x64", "win81-x86", "win81-arm", "win10-x64", "win10-x86", "win10-arm", "win10-arm64", "linux-x64", "linux-musl-x64", "linux-arm", "linux-arm64", "rhel-x64", "rhel.6-x64", "tizen", "tizen.4.0.0", "tizen.5.0.0", "osx-x64", "osx.10.10-x64", "osx.10.11-x64", "osx.10.12-x64", "osx.10.13-x64", "osx.10.14-x64"]
 
     steps:
     - uses: actions/checkout@v2
@@ -55,3 +55,23 @@ jobs:
         recursive: true
         dest: v${{ env.GitVersion_SemVer }}-${{ matrix.runtime }}.zip
 
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      with:
+        tag_name: ${{ env.GitVersion_SemVer }}
+        release_name: Release ${{ env.GitVersion_SemVer }}
+        draft: false
+        prerelease: false
+
+    - name: Upload ${{ matrix.runtime }} Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./v${{ env.GitVersion_SemVer }}-${{ matrix.runtime }}.zip
+        asset_name: v${{ env.GitVersion_SemVer }}-${{ matrix.runtime }}.zip
+        asset_content_type: application/zip
