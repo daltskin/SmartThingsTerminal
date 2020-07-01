@@ -3,6 +3,9 @@ name: .NET Core
 on:
   push:
     branches: [ master ]
+    paths-ignore: 
+      - 'docs/**'
+      - '**.md'
   pull_request:
     branches: [ master ]
 
@@ -109,7 +112,7 @@ jobs:
         dest: v${{ env.GitVersion_SemVer }}-win10-x86.zip    
         
     - name: Publish win10-x64
-      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v${{ env.GitVersion_SemVer }}/win10-x86 -c Release -r win10-x86 -f netcoreapp3.1 /p:PublishSingleFile=true /p:PublishTrimmed=true /p:AssemblyVersion=${{ env.GitVersion_SemVer }} /p:FileVersion=${{ env.GitVersion_SemVer }} /p:InformationalVersion=${{ env.GitVersion_SemVer }}
+      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v${{ env.GitVersion_SemVer }}/win10-x64 -c Release -r win10-x64 -f netcoreapp3.1 /p:PublishSingleFile=true /p:PublishTrimmed=true /p:AssemblyVersion=${{ env.GitVersion_SemVer }} /p:FileVersion=${{ env.GitVersion_SemVer }} /p:InformationalVersion=${{ env.GitVersion_SemVer }}
     
     - name: Zip win10-x64 release
       uses: papeloto/action-zip@v1
@@ -148,15 +151,15 @@ jobs:
         recursive: true
         dest: v${{ env.GitVersion_SemVer }}-win-x86.zip    
 
-    - name: Publish win10x64
+    - name: Publish win-x64
       run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v${{ env.GitVersion_SemVer }}/win-x64 -c Release -r win-x64 -f netcoreapp3.1 /p:PublishSingleFile=true /p:PublishTrimmed=true /p:AssemblyVersion=${{ env.GitVersion_SemVer }} /p:FileVersion=${{ env.GitVersion_SemVer }} /p:InformationalVersion=${{ env.GitVersion_SemVer }}
     
-    - name: Zip win10x64 release
+    - name: Zip win-x64 release
       uses: papeloto/action-zip@v1
       with:
-        files: publish/v${{ env.GitVersion_SemVer }}/win10x64/
+        files: publish/v${{ env.GitVersion_SemVer }}/win-x64/
         recursive: true
-        dest: v${{ env.GitVersion_SemVer }}-win10x64.zip    
+        dest: v${{ env.GitVersion_SemVer }}-win-64.zip    
 
     - name: Publish linux-x64
       run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v${{ env.GitVersion_SemVer }}/linux-x64 -c Release -r linux-x64 -f netcoreapp3.1 /p:PublishSingleFile=true /p:PublishTrimmed=true /p:AssemblyVersion=${{ env.GitVersion_SemVer }} /p:FileVersion=${{ env.GitVersion_SemVer }} /p:InformationalVersion=${{ env.GitVersion_SemVer }}
