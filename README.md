@@ -48,3 +48,9 @@ example:
 # Futures
 
 A future version may provide the ability to execute commands such as run scenes, turn on/off devices etc.
+
+# Credits
+
+This uses [Miguel de Icaza's](https://github.com/migueldeicaza) [console-based user inteface toolkit](https://github.com/migueldeicaza/gui.cs). Which, at the time of writing, is undergoing a substantial overhaul - hence the local project reference.
+
+This also uses the [CommandLineParser](https://github.com/commandlineparser/commandline) project for manipulating command line arguments.
