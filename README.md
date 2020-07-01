@@ -26,6 +26,8 @@ The current version is limited to read-only access to devices and configuration 
 
 # Usage
 
+Either clone the repo, or simply download the latest executable binaries version for your operating system from [releases](https://github.com/daltskin/SmartThingsTerminal/releases)
+
 Simply run from your command prompt providing your access token.  If you don't have an access token, it's easy to set one up here: https://account.smartthings.com/tokens
 
 ![screenshot](docs/pat.png)
