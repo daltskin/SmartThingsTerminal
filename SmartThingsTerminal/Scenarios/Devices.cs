@@ -129,7 +129,12 @@ namespace SmartThingsTerminal.Scenarios
 
             if (_viewDevices.Count > 0)
             {
-                CurrentView = CreateJsonView(_viewDevices?.FirstOrDefault().Value?.ToJson());
+                var firstItem = _viewDevices?.FirstOrDefault().Value;
+                if (firstItem != null)
+                {
+                    CurrentView = CreateJsonView(firstItem.ToJson());
+                    UpdateSettings(firstItem);
+                }
             }
         }
 

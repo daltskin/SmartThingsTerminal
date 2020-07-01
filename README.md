@@ -7,7 +7,7 @@
 
 # Overview
 
-SmartThings Terminal is a cross platform CLI tool for the SmartThings API, providing a simple GUI terminal for navigating devices and settings within your SmartThings environment.  The functionality of this CLI is driven by the supporting [SmartThingsNet](https://github.com/daltskin/SmartThingsNet) dotnet sdk, which uses the underlying [SmartThings API](https://smartthings.developer.samsung.com/docs/api-ref/st-api.html). 
+SmartThings Terminal is a cross platform CLI tool for the SmartThings API, providing a simple GUI terminal for navigating devices and settings within your SmartThings environment.  The functionality of this CLI is driven by the supporting [SmartThingsNet](https://github.com/daltskin/SmartThingsNet) dotnet sdk, which uses the underlying [SmartThings API](https://smartthings.developer.samsung.com/docs/api-ref/st-api.html). This tool is aimed at the SmartThings developer ecosystem to get quick insight into their smart home environments.
 
 # Features
 
@@ -30,18 +30,23 @@ Simply run from your command prompt providing your access token.  If you don't h
 
 ![screenshot](docs/pat.png)
 
+## Command line
+
+Using the -t (or --accesstoken) argument, provide your personal access token from the above into the STT  tool eg:
+
 ```bash
-./STT -t {GUID}
+$ ./STT -t {accesstoken}
 ```
 
-Or you can jump straight into a specific screen by providing the screen name: 
+
+Alternatively, you can jump straight into a specific screen by providing the screen name using the -s (or --screen) argument using one of the following values:
 
 | devices | installedapps | locations | rules | scenes | schedules | subscriptions |
 
-example:
+eg:
 
 ```bash
-./STT -t {GUID} -s devices
+$ ./STT -t {accesstoken} -s devices
 ```
 
 
