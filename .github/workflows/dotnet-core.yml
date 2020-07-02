@@ -55,7 +55,8 @@ jobs:
         recursive: true
         dest: v${{ env.GitVersion_SemVer }}-${{ matrix.runtime }}.zip
 
-    - name: Release
+    - name: Release ${{ env.GitVersion_SemVer }}
+      if: steps.release_check.outputs.skip_build != 'true' && github.event_name != 'pull_request'
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
