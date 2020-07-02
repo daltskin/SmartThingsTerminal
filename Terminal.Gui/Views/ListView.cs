@@ -551,15 +551,18 @@ namespace Terminal.Gui {
 		/// <param name="source"></param>
 		public ListWrapper (IList source)
 		{
-			count = source.Count;
-			marks = new BitArray (count);
-			this.src = source;
+			if (source != null)
+			{
+				count = source.Count;
+				marks = new BitArray(count);
+				this.src = source;
+			}
 		}
 
 		/// <summary>
 		/// Gets the number of items in the <see cref="IList"/>.
 		/// </summary>
-		public int Count => src.Count;
+		public int Count => Convert.ToInt32(src?.Count);
 
 		void RenderUstr (ConsoleDriver driver, ustring ustr, int col, int line, int width)
 		{

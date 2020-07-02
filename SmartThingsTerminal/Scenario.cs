@@ -59,7 +59,7 @@ namespace SmartThingsTerminal
             {
                 X = Pos.Center(),
                 Y = Pos.Center(),
-                Width = 50,
+                Width = Dim.Fill(),
                 Height = 5
             };
 
