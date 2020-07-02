@@ -51,13 +51,21 @@ namespace SmartThingsTerminal.Scenarios
                        .Select(t => new KeyValuePair<string, Subscription>(t.Id, t))
                        .ToDictionary(t => t.Key, t => t.Value);
                 }
+                else
+                {
+                    SetErrorView($"You have no subscriptions configured");
+                }
+            }
+            catch (SmartThingsNet.Client.ApiException exp)
+            {
+                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
             }
             catch (System.Exception exp)
             {
-                SetErrorView($"No data returned from API:{Environment.NewLine}{exp.Message}");
+                SetErrorView($"Unknown error calling API: {exp.Message}");
             }
 
-            ClassListView = new ListView(_viewSubscriptions?.Keys.ToList())
+            ClassListView = new ListView(_viewSubscriptions?.Keys?.ToList())
             {
                 X = 0,
                 Y = 0,
@@ -67,7 +75,7 @@ namespace SmartThingsTerminal.Scenarios
                 ColorScheme = Colors.TopLevel,
             };
 
-            if (_viewSubscriptions.Keys.Count > 0)
+            if (_viewSubscriptions?.Keys?.Count > 0)
             {
                 ClassListView.SelectedItemChanged += (args) =>
                 {
@@ -91,7 +99,7 @@ namespace SmartThingsTerminal.Scenarios
             Top.Add(LeftPane, HostPane);
             Top.Add(statusBar);
 
-            if (_viewSubscriptions.Count > 0)
+            if (_viewSubscriptions?.Count > 0)
             {
                 CurrentView = CreateJsonView(_viewSubscriptions?.FirstOrDefault().Value?.ToJson());
             }

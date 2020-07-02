@@ -51,13 +51,21 @@ namespace SmartThingsTerminal.Scenarios
                         .Select(t => new KeyValuePair<string, SceneSummary>(t.SceneName, t))
                         .ToDictionary(t => t.Key, t => t.Value);
                 }
+                else
+                {
+                    SetErrorView($"You have no scenes configured");
+                }
+            }
+            catch (SmartThingsNet.Client.ApiException exp)
+            {
+                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
             }
             catch (System.Exception exp)
             {
-                SetErrorView($"No data returned from API:{Environment.NewLine}{exp.Message}");
+                SetErrorView($"Unknown error calling API: {exp.Message}");
             }
 
-            ClassListView = new ListView(_viewScenes.Keys.ToList())
+            ClassListView = new ListView(_viewScenes?.Keys?.ToList())
             {
                 X = 0,
                 Y = 0,
@@ -67,7 +75,7 @@ namespace SmartThingsTerminal.Scenarios
                 ColorScheme = Colors.TopLevel,
             };
 
-            if (_viewScenes.Keys.Count > 0)
+            if (_viewScenes?.Keys?.Count > 0)
             {
                 ClassListView.SelectedItemChanged += (args) =>
                 {
@@ -91,7 +99,7 @@ namespace SmartThingsTerminal.Scenarios
             Top.Add(LeftPane, HostPane);
             Top.Add(statusBar);
 
-            if (_viewScenes.Count > 0)
+            if (_viewScenes?.Count > 0)
             {
                 CurrentView = CreateJsonView(_viewScenes?.FirstOrDefault().Value?.ToJson());
             }
