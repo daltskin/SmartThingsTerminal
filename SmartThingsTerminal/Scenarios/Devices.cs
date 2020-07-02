@@ -1,6 +1,4 @@
 ﻿using SmartThingsNet.Model;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using Terminal.Gui;
 
@@ -10,89 +8,12 @@ namespace SmartThingsTerminal.Scenarios
     [ScenarioCategory("Devices")]
     class Devices : Scenario
     {
-        Dictionary<string, Device> _viewDevices;
         FrameView _deviceDetailsFrame;
         FrameView _deviceLocationFrame;
 
-        public override void Init(Toplevel top, ColorScheme colorScheme, SmartThingsClient smartThingsClient)
-        {
-            Application.Init();
-
-            Top = top;
-            if (Top == null)
-            {
-                Top = Application.Top;
-            }
-            STClient = smartThingsClient;
-        }
-
         public override void Setup()
         {
-            var statusBar = new StatusBar(new StatusItem[] {
-                //new StatusItem(Key.ControlR, "~CTRL-R~ Refresh Data", () => RefreshScreen()),
-                new StatusItem(Key.ControlQ, "~CTRL-Q~ Back/Quit", () => Quit())
-            });
-
-            LeftPane = new Window("Devices")
-            {
-                X = 0,
-                Y = 0, // for menu
-                Width = 40,
-                Height = Dim.Fill(),
-                CanFocus = false,
-                ColorScheme = Colors.TopLevel,
-            };
-
-            try
-            {
-                if (STClient.GetAllDevices().Items?.Count > 0)
-                {
-                    _viewDevices = STClient.GetAllDevices().Items
-                        .OrderBy(t => t.Name)
-                        .Select(t => new KeyValuePair<string, Device>(t.Label, t))
-                        .ToDictionary(t => t.Key, t => t.Value);
-                }
-                else
-                {
-                    SetErrorView($"You have no devices configured");
-                }
-            }
-            catch (SmartThingsNet.Client.ApiException exp)
-            {
-                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
-            }
-            catch (System.Exception exp)
-            {
-                SetErrorView($"Unknown error calling API: {exp.Message}");
-            }
-
-            ClassListView = new ListView(_viewDevices?.Keys?.ToList())
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill(0),
-                Height = Dim.Fill(), // for status bar
-                AllowsMarking = false,
-                ColorScheme = Colors.TopLevel
-            };
-
-            if (_viewDevices?.Keys?.Count > 0)
-            {
-                ClassListView.OpenSelectedItem += (a) =>
-                {
-                    Top.SetFocus(SettingsPane);
-                };
-                ClassListView.SelectedItemChanged += (args) =>
-                {
-                    ClearClass(CurrentView);
-
-                    var selectedDevice = _viewDevices.Values.ToArray()[ClassListView.SelectedItem];
-                    string json = selectedDevice.ToJson();
-                    CurrentView = CreateJsonView(json);
-                    UpdateSettings(selectedDevice);
-                };
-            }
-            LeftPane.Add(ClassListView);
+            ConfigureLeftPane(GetName());
 
             SettingsPane = new FrameView("Settings")
             {
@@ -122,32 +43,14 @@ namespace SmartThingsTerminal.Scenarios
             };
 
             SettingsPane.Add(_deviceLocationFrame);
-
-            HostPane = new FrameView("")
-            {
-                X = Pos.Right(LeftPane),
-                Y = Pos.Bottom(SettingsPane),
-                Width = Dim.Fill(),
-                Height = Dim.Fill(1), // + 1 for status bar
-                ColorScheme = Colors.Dialog,
-            };
-
-            Top.Add(LeftPane, SettingsPane, HostPane);
-            Top.Add(statusBar);
-
-            if (_viewDevices?.Count > 0)
-            {
-                var firstItem = _viewDevices?.FirstOrDefault().Value;
-                if (firstItem != null)
-                {
-                    CurrentView = CreateJsonView(firstItem.ToJson());
-                    UpdateSettings(firstItem);
-                }
-            }
+            ConfigureHostPane("");
+            ConfigureWindows<Device>(false, false);
         }
 
-        void UpdateSettings(Device device)
+        public override void UpdateSettings<T>(object selectedItem)
         {
+            Device device = (Device)selectedItem;
+
             _deviceDetailsFrame.Clear();
 
             var labelId = new Label("Id:") { X = 0, Y = 0 };
@@ -194,11 +97,6 @@ namespace SmartThingsTerminal.Scenarios
             _deviceLocationFrame.Add(labelRoom);
             var deviceRoom = new TextField($"{roomName}") { X = Pos.Right(labelRoom) + 1, Y = 1, Width = 40 };
             _deviceLocationFrame.Add(deviceRoom);
-        }
-
-        private void Quit()
-        {
-            Application.RequestStop();
         }
     }
 }
