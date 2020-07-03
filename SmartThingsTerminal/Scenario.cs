@@ -294,6 +294,16 @@ namespace SmartThingsTerminal
             try
             {
                 displayItemList = GetDisplayData<T>();
+
+                var itemListView = GetClassListView(displayItemList);
+                if (itemListView != null)
+                {
+                    LeftPane.Add(itemListView);
+                }
+                else
+                {
+                    SetErrorView($"You have no {GetName()} configured");
+                }
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
@@ -302,16 +312,6 @@ namespace SmartThingsTerminal
             catch (System.Exception exp)
             {
                 SetErrorView($"Unknown error calling API: {exp.Message}");
-            }
-
-            var itemListView = GetClassListView(displayItemList);
-            if (itemListView != null)
-            {
-                LeftPane.Add(itemListView);
-            }
-            else
-            {
-                SetErrorView($"You have no {GetName()} configured");
             }
 
             if (SettingsPane == null)
