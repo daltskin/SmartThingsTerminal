@@ -13,16 +13,17 @@ SmartThings Terminal is a cross platform CLI tool for the SmartThings API, provi
 
 ![screenshot](docs/devices.png)
 
-The current version is limited to read-only access to devices and configuration settings within SmartThings.  This tool provides insights into what goes on under the hood of SmartThings such as:
+The current version is limited to read-only access to devices and configuration settings within SmartThings, with the ability to run scenes.  This tool provides insights into what goes on under the hood of SmartThings such as:
 
 * View Devices - view all of the devices registered
 * Install Applications - view details of any additional installed applications
 * Locations - view the different locations you have configured
 * Rooms - view the different rooms you have configured in all locations
 * Rules - view automations
-* Scenes - view the details of all your scenes
+* Scenes - view the details your scenes and run them
 * Schedules - view integration schedules
 * Subscriptions - view integration notification events
+* F5 Refresh - refresh data at any point
 
 # Usage
 
@@ -54,7 +55,7 @@ $ ./STT -t {accesstoken} -s devices
 
 # Futures
 
-A future version may provide the ability to execute commands such as run scenes, turn on/off devices etc.
+A future version may provide the ability to update configuration.
 
 # Credits
 
