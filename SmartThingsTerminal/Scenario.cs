@@ -21,6 +21,8 @@ namespace SmartThingsTerminal
 
         public Window LeftPane { get; set; }
         public ListView ClassListView { get; set; }
+
+        public dynamic SelectedItem { get; set; }
         public FrameView HostPane { get; set; }
 
         public FrameView SettingsPane { get; set; }
@@ -30,6 +32,7 @@ namespace SmartThingsTerminal
         public View CurrentView { get; set; }
 
         public StatusBar StatusBar { get; set; }
+
 
         public virtual View CreateJsonView(string json)
         {
@@ -98,7 +101,7 @@ namespace SmartThingsTerminal
             Run();
         }
 
-        private void Quit()
+        public virtual void Quit()
         {
             Application.RequestStop();
         }
@@ -106,7 +109,7 @@ namespace SmartThingsTerminal
         public virtual void ConfigureStatusBar()
         {
             StatusBar = new StatusBar(new StatusItem[] {
-                new StatusItem(Key.ControlR, "~F5~ Refresh Data", () => RefreshScreen()),
+                new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
             });
         }
@@ -179,10 +182,10 @@ namespace SmartThingsTerminal
                 classListView.SelectedItemChanged += (args) =>
                 {
                     ClearClass(CurrentView);
-                    var selectedItem = displayItemList.Values.ToArray()[classListView.SelectedItem];
-                    string json = ((dynamic)selectedItem).ToJson();
+                    SelectedItem = displayItemList.Values.ToArray()[classListView.SelectedItem];
+                    string json = SelectedItem.ToJson();
                     CurrentView = CreateJsonView(json);
-                    UpdateSettings<T>(selectedItem);
+                    UpdateSettings<T>(SelectedItem);
                 };
             }
             return classListView;
