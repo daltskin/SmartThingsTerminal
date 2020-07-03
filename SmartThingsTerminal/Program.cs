@@ -314,10 +314,10 @@ namespace SmartThingsTerminal
                 _capslock,
                 _numlock,
                 _scrolllock,
-                new StatusItem(Key.ControlR, "~CTRL-R~ Refresh Data", () => {
+                new StatusItem(Key.F5, "~F5~ Refresh Data", () => {
                     _stClient.ResetData();
                 }),
-                new StatusItem(Key.ControlQ, "~CTRL-Q~ Back/Quit", () => {
+                new StatusItem(Key.ControlQ, "~CTRL-Q~ Quit", () => {
                     if (_runningScenario is null){
 						// This causes GetScenarioToRun to return null
 						_runningScenario = null;

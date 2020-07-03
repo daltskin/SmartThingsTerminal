@@ -1,6 +1,9 @@
-﻿using NStack;
+﻿using Microsoft.VisualBasic;
+using NStack;
+using SmartThingsNet.Model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Terminal.Gui;
 
@@ -25,6 +28,8 @@ namespace SmartThingsTerminal
         public Label ErrorView { get; set; }
 
         public View CurrentView { get; set; }
+
+        public StatusBar StatusBar { get; set; }
 
         public virtual View CreateJsonView(string json)
         {
@@ -88,15 +93,252 @@ namespace SmartThingsTerminal
         {
             ErrorView = null;
             STClient.ResetData();
-
-            Top.Clear();
-            HostPane.Clear();
-            ClassListView.Clear();
-            LeftPane.Clear();
-            SettingsPane.Clear();
+            Top.RemoveAll();
             Setup();
+            Run();
+        }
 
-            Application.Refresh();
+        private void Quit()
+        {
+            Application.RequestStop();
+        }
+
+        public virtual void ConfigureStatusBar()
+        {
+            StatusBar = new StatusBar(new StatusItem[] {
+                new StatusItem(Key.ControlR, "~F5~ Refresh Data", () => RefreshScreen()),
+                new StatusItem(Key.Home, "~Home~ Back", () => Quit())
+            });
+        }
+
+        public virtual void ConfigureLeftPane(string title)
+        {
+            LeftPane = new Window(title)
+            {
+                X = 0,
+                Y = 0, // for menu
+                Width = 40,
+                Height = Dim.Fill(),
+                CanFocus = false,
+                ColorScheme = Colors.TopLevel,
+            };
+        }
+
+        public virtual void ConfigureHostPane(string title)
+        {
+            Pos settingsY = new Pos();
+            if (SettingsPane?.Subviews.Count > 0)
+            {
+                settingsY = Pos.Bottom(SettingsPane);
+            }
+            
+            HostPane = new FrameView(title)
+            {
+                X = Pos.Right(LeftPane),
+                Y = settingsY,
+                Width = Dim.Fill(),
+                Height = Dim.Fill(1), // + 1 for status bar
+                ColorScheme = Colors.Dialog,
+            };
+        }
+
+        public virtual void ConfigureSettingsPane()
+        {
+            SettingsPane = new FrameView("Settings")
+            {
+                X = Pos.Right(LeftPane),
+                Y = 0, // for menu
+                Width = Dim.Fill(),
+                Height = 8,
+                CanFocus = false,
+                ColorScheme = Colors.TopLevel,
+            };
+        }
+
+        public virtual void UpdateSettings<T>(object selectedItem)
+        { 
+        
+        }
+
+        public ListView GetClassListView<T>(Dictionary<string, T> displayItemList)
+        {
+            ListView classListView = null;
+
+            if (displayItemList?.Keys.Count > 0)
+            {
+                classListView = new ListView(displayItemList.Keys.ToList())
+                {
+                    X = 0,
+                    Y = 0,
+                    Width = Dim.Fill(0),
+                    Height = Dim.Fill(), // for status bar
+                    AllowsMarking = false,
+                    ColorScheme = Colors.TopLevel,
+                };
+
+                classListView.SelectedItemChanged += (args) =>
+                {
+                    ClearClass(CurrentView);
+                    var selectedItem = displayItemList.Values.ToArray()[classListView.SelectedItem];
+                    string json = ((dynamic)selectedItem).ToJson();
+                    CurrentView = CreateJsonView(json);
+                    UpdateSettings<T>(selectedItem);
+                };
+            }
+            return classListView;
+        }
+
+        public Dictionary<string, dynamic> GetDisplayData<T>()
+        {
+            Dictionary<string, dynamic> retVal = null;
+
+            if (typeof(T) == typeof(SceneSummary))
+            {
+                if (STClient.GetAllScenes().Items?.Count > 0)
+                {
+                    retVal = STClient.GetAllScenes().Items
+                        .OrderBy(t => t.SceneName)
+                        .Select(t => new KeyValuePair<string, dynamic>(t.SceneName, t))
+                        .ToDictionary(t => t.Key, t => t.Value);
+                }
+            }
+            else if (typeof(T) == typeof(Device))
+            {
+                if (STClient.GetAllDevices().Items?.Count > 0)
+                {
+                    retVal = STClient.GetAllDevices().Items
+                        .OrderBy(t => t.Name)
+                        .Select(t => new KeyValuePair<string, dynamic>(t.Label, t))
+                        .ToDictionary(t => t.Key, t => t.Value);
+                }
+            }
+            else if (typeof(T) == typeof(Subscription))
+            {
+                if (STClient.GetAllSubscriptions().Items?.Count > 0)
+                {
+                    retVal = STClient.GetAllSubscriptions().Items
+                       .OrderBy(t => t.Id)
+                       .Select(t => new KeyValuePair<string, dynamic>(t.Id, t))
+                       .ToDictionary(t => t.Key, t => t.Value);
+                }
+            }
+            else if (typeof(T) == typeof(InstalledApp))
+            {
+                if (STClient.GetAllInstalledApps().Items?.Count > 0)
+                {
+                    retVal = STClient.GetAllInstalledApps().Items
+                        .OrderBy(t => t.DisplayName)
+                        .Select(t => new KeyValuePair<string, dynamic>(t.DisplayName, t))
+                        .ToDictionary(t => t.Key, t => t.Value);
+                }
+            }
+            else if (typeof(T) == typeof(Location))
+            {
+                if (STClient.GetAllLocations().Items?.Count > 0)
+                {
+                    retVal = STClient.GetAllLocations().Items
+                        .OrderBy(t => t.Name)
+                        .Select(t => new KeyValuePair<string, dynamic>(t.Name, t))
+                        .ToDictionary(t => t.Key, t => t.Value);
+                }
+            }
+            else if (typeof(T) == typeof(Room))
+            {
+                if (STClient.GetAllRooms().Items?.Count > 0)
+                {
+                    retVal = STClient.GetAllRooms().Items
+                        .OrderBy(t => t.Name)
+                        .Select(t => new KeyValuePair<string, dynamic>(t.Name, t))
+                        .ToDictionary(t => t.Key, t => t.Value);
+                }
+            }
+            else if (typeof(T) == typeof(Rule))
+            {
+                if (STClient.GetAllRules().Items?.Count > 0)
+                {
+                    retVal = STClient.GetAllRules().Items
+                       .OrderBy(t => t.Name)
+                       .Select(t => new KeyValuePair<string, dynamic>(t.Name, t))
+                       .ToDictionary(t => t.Key, t => t.Value);
+                }
+            }
+            else if (typeof(T) == typeof(Schedule))
+            {
+                if (STClient.GetAllSchedules().Items?.Count > 0)
+                {
+                    retVal = STClient.GetAllSchedules().Items
+                       .OrderBy(t => t.Name)
+                       .Select(t => new KeyValuePair<string, dynamic>(t.Name, t))
+                       .ToDictionary(t => t.Key, t => t.Value);
+                }
+            }
+
+            return retVal;
+        }
+
+        public virtual void ConfigureWindows<T>(bool configureLeftPane = true, bool configureHostPane = true)
+        {
+            if (configureLeftPane)
+            {
+                ConfigureLeftPane(GetName());
+            }
+            if (configureHostPane)
+            {
+                ConfigureHostPane("");
+            }
+
+            ConfigureStatusBar();
+
+            Dictionary<string, dynamic> displayItemList = null;
+
+            try
+            {
+                displayItemList = GetDisplayData<T>();
+
+                var itemListView = GetClassListView(displayItemList);
+                if (itemListView != null)
+                {
+                    LeftPane.Add(itemListView);
+                }
+                else
+                {
+                    SetErrorView($"You have no {GetName()} configured");
+                }
+            }
+            catch (SmartThingsNet.Client.ApiException exp)
+            {
+                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+            }
+            catch (System.Exception exp)
+            {
+                SetErrorView($"Unknown error calling API: {exp.Message}");
+            }
+
+            if (SettingsPane == null)
+            {
+                Top.Add(LeftPane, HostPane);
+            }
+            else
+            {
+                Top.Add(LeftPane, SettingsPane, HostPane);
+            }
+
+            Top.Add(StatusBar);
+
+            if (displayItemList?.Count > 0)
+            {
+                var firstItem = displayItemList?.FirstOrDefault().Value;
+                if (firstItem != null)
+                {
+                    CurrentView = CreateJsonView(firstItem.ToJson());
+                    if (SettingsPane != null)
+                    {
+                        UpdateSettings<T>(firstItem);
+                    }
+                }
+            }
+
+            DisplayErrorView();
         }
 
         /// <summary>
@@ -115,7 +357,7 @@ namespace SmartThingsTerminal
         /// Overrides that do not call the base.<see cref="Run"/>, must call <see cref="Application.Init "/> before creating any views or calling other Terminal.Gui APIs.
         /// </para>
         /// </remarks>
-        public virtual void Init(Toplevel top, ColorScheme colorScheme, SmartThingsClient SmartThingsTerminalent)
+        public virtual void Init(Toplevel top, ColorScheme colorScheme, SmartThingsClient smartThingsClient)
         {
             Application.Init();
 
@@ -135,7 +377,7 @@ namespace SmartThingsTerminal
             };
             Top.Add(Win);
 
-            STClient = SmartThingsTerminalent;
+            STClient = smartThingsClient;
         }
 
         /// <summary>
