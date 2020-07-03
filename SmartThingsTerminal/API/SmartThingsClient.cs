@@ -283,6 +283,11 @@ namespace SmartThingsTerminal
             return _allSchedules;
         }
 
+        public StandardSuccessResponse RunScene(string sceneId)
+        {
+            return _scenesApi.ExecuteScene(sceneId);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)
