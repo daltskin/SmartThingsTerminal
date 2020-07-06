@@ -96,6 +96,7 @@ namespace SmartThingsTerminal
                 scenario.Setup();
                 scenario.Run();
                 scenario = GetScenarioToRun();
+                Application.Refresh();
             }
             if (!_top.Running)
                 Application.Shutdown(true);
