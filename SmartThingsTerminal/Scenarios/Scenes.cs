@@ -1,4 +1,8 @@
-﻿using SmartThingsNet.Model;
+﻿using Newtonsoft.Json;
+using RestSharp.Serialization.Json;
+using SmartThingsNet.Model;
+using System.Collections.Generic;
+using System.Linq;
 using Terminal.Gui;
 
 namespace SmartThingsTerminal.Scenarios
@@ -9,7 +13,27 @@ namespace SmartThingsTerminal.Scenarios
     {
         public override void Setup()
         {
-            ConfigureWindows<SceneSummary>();
+            Dictionary<string, dynamic> displayItemList = null;
+
+            try
+            {
+                if (STClient.GetAllScenes().Items?.Count > 0)
+                {
+                    displayItemList = STClient.GetAllScenes().Items
+                        .OrderBy(t => t.SceneName)
+                        .Select(t => new KeyValuePair<string, dynamic>(t.SceneName, t))
+                        .ToDictionary(t => t.Key, t => t.Value);
+                }
+            }
+            catch (SmartThingsNet.Client.ApiException exp)
+            {
+                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+            }
+            catch (System.Exception exp)
+            {
+                SetErrorView($"Unknown error calling API: {exp.Message}");
+            }
+            ConfigureWindows<SceneSummary>(displayItemList);
         }
 
         public override void ConfigureStatusBar()
@@ -26,13 +50,7 @@ namespace SmartThingsTerminal.Scenarios
             if (SelectedItem != null)
             {
                 var response = STClient.RunScene(((SceneSummary)SelectedItem).SceneId);
-                var statusButton = new Button($"Execution: {response.Status}")
-                {
-                    X = Pos.Center(),
-                    Y = Pos.Bottom(HostPane) + 4,
-                    IsDefault = true,
-                };
-                Top.Add(statusButton);
+                ShowStatusBarMessage($"Execution: {response.Status}");
             }
         }
     }

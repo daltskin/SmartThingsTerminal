@@ -1,5 +1,9 @@
-﻿using SmartThingsNet.Model;
+﻿using Newtonsoft.Json;
+using SmartThingsNet.Model;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Terminal.Gui;
 
 namespace SmartThingsTerminal.Scenarios
@@ -8,13 +12,64 @@ namespace SmartThingsTerminal.Scenarios
     [ScenarioCategory("Devices")]
     class Devices : Scenario
     {
-        FrameView _deviceDetailsFrame;
-        FrameView _deviceLocationFrame;
+        private FrameView _deviceDetailsFrame;
+        private FrameView _deviceLocationFrame;
+        private TextView _capabilitiesStatusJsonView;
+        private ListView _componentList;
+        private FrameView _componentFrame;
+        private int _selectedCapabilityIndex = 0;
+        private Dictionary<string, AttributeState> _selectedCapabilityState;
 
         public override void Setup()
         {
             ConfigureLeftPane(GetName());
+            ConfigureSettingsPane();
 
+            Dictionary<string, dynamic> displayItemList = null;
+
+            try
+            {
+                if (STClient.GetAllDevices().Items?.Count > 0)
+                {
+                    displayItemList = STClient.GetAllDevices().Items
+                        .OrderBy(t => t.Name)
+                        .Select(t => new KeyValuePair<string, dynamic>(t.Label, t))
+                        .ToDictionary(t => t.Key, t => t.Value);
+                }
+            }
+            catch (SmartThingsNet.Client.ApiException exp)
+            {
+                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+            }
+            catch (System.Exception exp)
+            {
+                SetErrorView($"Unknown error calling API: {exp.Message}");
+            }
+
+            ConfigureWindows<Device>(displayItemList, false, false);
+
+            ClassListView.Enter += (args) =>
+            {
+                if (_componentFrame != null)
+                {
+                    HostPane.Remove(_componentFrame);
+                    _componentFrame = null;
+                }
+                if (_componentList != null)
+                {
+                    HostPane.Remove(_componentList);
+                    _componentList = null;
+                }
+                if (_capabilitiesStatusJsonView != null)
+                {
+                    HostPane.Remove(_capabilitiesStatusJsonView);
+                    _capabilitiesStatusJsonView = null;
+                }
+            };
+        }
+
+        public override void ConfigureSettingsPane()
+        {
             SettingsPane = new FrameView("Settings")
             {
                 X = Pos.Right(LeftPane),
@@ -44,7 +99,6 @@ namespace SmartThingsTerminal.Scenarios
 
             SettingsPane.Add(_deviceLocationFrame);
             ConfigureHostPane("");
-            ConfigureWindows<Device>(false, false);
         }
 
         public override void UpdateSettings<T>(object selectedItem)
@@ -97,6 +151,199 @@ namespace SmartThingsTerminal.Scenarios
             _deviceLocationFrame.Add(labelRoom);
             var deviceRoom = new TextField($"{roomName}") { X = Pos.Right(labelRoom) + 1, Y = 1, Width = 40 };
             _deviceLocationFrame.Add(deviceRoom);
+        }
+
+        public override void ConfigureStatusBar()
+        {
+            StatusBar = new StatusBar(new StatusItem[] {
+                new StatusItem(Key.F1, "~F1~ Component Status", () => ToggleComponentStatus()),
+                new StatusItem(Key.F4, "~F4~ Toggle Device Switch", () => ToggleDeviceSwitch()),
+                new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
+                new StatusItem(Key.Home, "~Home~ Back", () => Quit())
+            });
+        }
+
+        private void ConfigureComponentsStatusPane(Device selectedDevice)
+        {
+            _componentFrame = new FrameView()
+            {
+                X = 0,
+                Y = 0,
+                Height = Dim.Fill(),
+                Width = Dim.Fill(),
+                Title = "main",
+                ColorScheme = Colors.TopLevel
+            };
+
+            _componentList = new ListView(selectedDevice.Components.FirstOrDefault().Capabilities.Select(c => c.Id).ToList());
+
+            _componentList.X = 0;
+            _componentList.Y = 0;
+            _componentList.Width = 20;
+            _componentList.Height = Dim.Fill();
+            _componentList.AllowsMarking = false;
+            _componentList.ColorScheme = Colors.TopLevel;
+
+            _componentList.SelectedItemChanged += (args) =>
+            {
+                _selectedCapabilityIndex = args.Item;
+                GetComponentStatus(selectedDevice, args.Item);
+            };
+
+            _capabilitiesStatusJsonView = new TextView()
+            {
+                Y = 0,
+                X = Pos.Right(_componentList),
+                Width = Dim.Fill(),
+                Height = Dim.Fill(),
+                ReadOnly = true,
+                ColorScheme = Colors.Dialog,
+            };
+
+            _componentFrame.Add(_componentList, _capabilitiesStatusJsonView);
+
+            HostPane.Add(_componentFrame);
+
+            HostPane.SetFocus(_componentList);
+            GetComponentStatus(selectedDevice, 0);
+            HostPane.ColorScheme = Colors.TopLevel;
+        }
+
+        public void ToggleDeviceSwitch()
+        {
+            if (SelectedItem != null)
+            {
+                Device selectedDevice = (Device)SelectedItem;
+                try
+                {
+                    var deviceCurrentStatus = STClient.GetDeviceCapabilityStatus(selectedDevice.DeviceId, selectedDevice.Components[0].Id, "switch");
+
+                    if (deviceCurrentStatus.Count > 0)
+                    {
+                        string state = deviceCurrentStatus["switch"].Value.ToString().ToLower();
+                        string newState = state == "on" ? "off" : "on";
+
+                        DeviceCommandsRequest commandsRequest = new DeviceCommandsRequest() { Commands = new List<DeviceCommand>() };
+                        DeviceCommand command = new DeviceCommand(capability: "switch", command: newState);
+                        commandsRequest.Commands.Add(command);
+                        STClient.ExecuteDevicecommand(selectedDevice.DeviceId, commandsRequest);
+                        ShowStatusBarMessage($"Switch {newState} at {DateTime.UtcNow.ToLongTimeString()}");
+                    }
+                    else
+                    {
+                        ShowStatusBarMessage($"{selectedDevice.Name} has no switch capability");
+                    }
+                }
+                catch (SmartThingsNet.Client.ApiException exp)
+                {
+                    ShowStatusBarMessage($"Error: {exp.ErrorCode}");
+                }
+                catch (System.Exception exp)
+                {
+                    ShowStatusBarMessage($"Error: {exp.Message}");
+                }
+            }
+        }
+
+        public void UpdateComponentStatus()
+        {
+            if (SelectedItem != null && _componentFrame != null)
+            {
+                Device selectedDevice = (Device)SelectedItem;
+                try
+                {
+                    var componentCapabilityStatus = JsonConvert.DeserializeObject<AttributeState>(_capabilitiesStatusJsonView.Text.ToString());
+
+                    var commandsRequest = new DeviceCommandsRequest() { Commands = new List<DeviceCommand>() };
+
+                    //foreach (var statusUpdate in componentCapabilityStatus)
+                    //{
+                    //    var command = new DeviceCommand(
+                    //  capability: statusUpdate.Key, // selectedDevice.Components.FirstOrDefault().Capabilities[_selectedCapabilityIndex].Id,
+                    //  command: statusUpdate.Value);
+
+                    //    commandsRequest.Commands.Add(command);
+                    //}
+
+                    var command = new DeviceCommand(
+                        capability: selectedDevice.Components.FirstOrDefault().Capabilities[_selectedCapabilityIndex].Id,
+                        command: componentCapabilityStatus.Value);
+
+                    commandsRequest.Commands.Add(command);
+                    object response = STClient.ExecuteDevicecommand(selectedDevice.DeviceId, commandsRequest);
+                    ShowStatusBarMessage($"Executed: {DateTime.UtcNow.ToLongTimeString()}");
+                }
+                catch (SmartThingsNet.Client.ApiException exp)
+                {
+                    // 403 errors can come from trying to read inaccessible component status eg:
+                    // https://api.smartthings.com/v1/devices/{guid}/components/main/capabilities/configuration/status
+                    _capabilitiesStatusJsonView.Text = $"Error executing: {exp.ErrorCode}";
+                }
+                catch (System.Exception exp)
+                {
+                    ShowStatusBarMessage($"Error: {exp.Message}");
+                }
+            }
+        }
+
+        private void GetComponentStatus(Device selectedDevice, int selectedItemIndex)
+        {
+            try
+            {
+                var componentCapabilityStatus = STClient.GetDeviceCapabilityStatus(
+                           selectedDevice.DeviceId,
+                           selectedDevice.Components.FirstOrDefault().Id,
+                           selectedDevice.Components.FirstOrDefault().Capabilities[selectedItemIndex].Id);
+
+                if (componentCapabilityStatus != null)
+                {
+                    _selectedCapabilityState = componentCapabilityStatus;
+
+                    StringBuilder sb = new StringBuilder();
+                    foreach (var capabilityStatus in componentCapabilityStatus)
+                    {
+                        sb.AppendLine($"\"{capabilityStatus.Key}\":");
+                        sb.AppendLine(capabilityStatus.Value.ToJson());
+                    }
+                    _capabilitiesStatusJsonView.Text = FormatJson(sb.ToString());
+                }
+            }
+            catch (SmartThingsNet.Client.ApiException exp)
+            {
+                // 403 errors can come from trying to read inaccessible component status eg:
+                // https://api.smartthings.com/v1/devices/{guid}/components/main/capabilities/configuration/status
+                _capabilitiesStatusJsonView.Text = $"Error: {exp.ErrorCode}";
+            }
+            catch (System.Exception exp)
+            {
+                ShowStatusBarMessage($"Error: {exp.Message}");
+            }
+        }
+
+        public void ToggleComponentStatus()
+        {
+            if (SelectedItem != null)
+            {
+                if (_componentFrame != null)
+                {
+                    HostPane.Remove(_componentFrame);
+                    HostPane.Remove(_componentList);
+                    HostPane.Remove(_capabilitiesStatusJsonView);
+                    _componentFrame = null;
+                    _componentList = null;
+                    _capabilitiesStatusJsonView = null;
+                    LeftPane.SetFocus(ClassListView);
+                }
+                else
+                {
+                    Device selectedDevice = (Device)SelectedItem;
+                    ConfigureComponentsStatusPane(selectedDevice);
+                }
+            }
+            else
+            { 
+            
+            }
         }
     }
 }

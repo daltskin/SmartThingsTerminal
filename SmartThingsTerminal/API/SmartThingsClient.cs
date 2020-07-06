@@ -3,7 +3,6 @@ using SmartThingsNet.Client;
 using SmartThingsNet.Model;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace SmartThingsTerminal
@@ -283,9 +282,39 @@ namespace SmartThingsTerminal
             return _allSchedules;
         }
 
+        public object ExecuteDevicecommand(string deviceId, DeviceCommandsRequest commandRequest)
+        {
+            return _devicesApi.ExecuteDeviceCommands(deviceId, commandRequest);
+        }
+
+        public Dictionary<string, AttributeState> GetDeviceCapabilityStatus(string deviceId, string componentId, string capabilityId)
+        {
+            return _devicesApi.GetDeviceStatusByCapability(deviceId, componentId, capabilityId);
+        }
+
         public StandardSuccessResponse RunScene(string sceneId)
         {
             return _scenesApi.ExecuteScene(sceneId);
+        }
+
+        public Rule UpdateRule(string ruleId, string locationId, RuleRequest ruleRequest)
+        {
+            return _rulesApi.UpdateRule(ruleId, locationId, ruleRequest);
+        }
+
+        public Location UpdateLocation(string locationId, UpdateLocationRequest locationRequest)
+        {
+            return _locationsApi.UpdateLocation(locationId, locationRequest);
+        }
+
+        public Room UpdateRoom(string locationId, string roomId, UpdateRoomRequest roomRequest)
+        {
+            return _roomsApi.UpdateRoom(locationId, roomId, roomRequest);
+        }
+
+        public App UpdateApp(string appName, UpdateAppRequest updateAppRequest)
+        {
+            return _appsApi.UpdateApp(appName,updateAppRequest);
         }
 
         protected virtual void Dispose(bool disposing)

@@ -7,23 +7,47 @@
 
 # Overview
 
-SmartThings Terminal is a cross platform CLI tool for the SmartThings API, providing a simple GUI terminal for navigating devices and settings within your SmartThings environment.  The functionality of this CLI is driven by the supporting [SmartThingsNet](https://github.com/daltskin/SmartThingsNet) dotnet sdk, which uses the underlying [SmartThings API](https://smartthings.developer.samsung.com/docs/api-ref/st-api.html). This tool is aimed at the SmartThings developer ecosystem to get quick insight into their smart home environments.
+SmartThings Terminal is a cross platform CLI tool for the SmartThings API, providing a simple GUI terminal for navigating devices and settings within your SmartThings environment.  The functionality of this CLI is driven by the supporting [SmartThingsNet](https://github.com/daltskin/SmartThingsNet) dotnet sdk, which uses the underlying [SmartThings API](https://smartthings.developer.samsung.com/docs/api-ref/st-api.html). This tool is aimed at the SmartThings developer ecosystem and the curious to get quick insight into their smart home environments.
 
 # Features
 
 ![screenshot](docs/devices.png)
 
-The current version is limited to read-only access to devices and configuration settings within SmartThings, with the ability to run scenes.  This tool provides insights into what goes on under the hood of SmartThings such as:
+This CLI tool has the following features:
 
-* View Devices - view all of the devices registered
-* Install Applications - view details of any additional installed applications
-* Locations - view the different locations you have configured
-* Rooms - view the different rooms you have configured in all locations
-* Rules - view automations
-* Scenes - view the details your scenes and run them
-* Schedules - view integration schedules
-* Subscriptions - view integration notification events
+* View Devices
+  * View all of the registered devices
+  * View device components status
+  * Toggle lights/switches on/off
+* Install Applications
+  * View details of installed applications
+* Locations
+  * View the different location details
+  * Edit/Update location details
+* Rooms
+  * View the rooms in all locations
+  * Edit/update room details
+* Rules
+  * View rules
+* Scenes
+  * View scene details
+  * Run scenes
+* Schedules
+  * View integration schedules
+* Subscriptions
+  * View integration notification events
+
+# Hotkeys
+
+Hotkeys are dependant on the selected screen:
+
+* F1 Device component status
+* F4 Toggle device switch on/off
+* F3 Edit
+* F4 Save
 * F5 Refresh - refresh data at any point
+* Home - Back to menu screen
+* CTRL-Q - Quit
 
 # Usage
 
@@ -51,11 +75,6 @@ eg:
 ```bash
 $ ./STT -t {accesstoken} -s devices
 ```
-
-
-# Futures
-
-A future version may provide the ability to update configuration.
 
 # Credits
 
