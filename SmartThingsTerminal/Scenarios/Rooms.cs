@@ -38,26 +38,29 @@ namespace SmartThingsTerminal.Scenarios
         {
             StatusBar = new StatusBar(new StatusItem[] {
                 new StatusItem(Key.F3, "~F3~ Edit", () => EnableEditMode()),
-                new StatusItem(Key.F4, "~F4~ Save", () => SaveUpdates()),
+                new StatusItem(Key.F4, "~F4~ Save", () => SaveItem()),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
             });
         }
 
-        public override bool SaveUpdates()
+        public override bool SaveItem()
         {
             var json = JsonView?.Text.ToString();
 
-            try
+            if (! string.IsNullOrEmpty(json))
             {
-                var room = JsonConvert.DeserializeObject<Room>(json);
-                UpdateRoomRequest roomRequest = new UpdateRoomRequest(room.Name);
-                STClient.UpdateRoom(room.LocationId.ToString(), room.RoomId.ToString(), roomRequest);
-                RefreshScreen();
-            }
-            catch (System.Exception exp)
-            {
-                ShowStatusBarMessage($"Error updating: {exp}");
+                try
+                {
+                    var room = JsonConvert.DeserializeObject<Room>(json);
+                    UpdateRoomRequest roomRequest = new UpdateRoomRequest(room.Name);
+                    STClient.UpdateRoom(room.LocationId.ToString(), room.RoomId.ToString(), roomRequest);
+                    RefreshScreen();
+                }
+                catch (System.Exception exp)
+                {
+                    ShowStatusBarMessage($"Error updating: {exp}");
+                }
             }
             return true;
         }

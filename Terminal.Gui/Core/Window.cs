@@ -2,6 +2,13 @@
 // Authors:
 //   Miguel de Icaza (miguel@gnome.org)
 //
+// NOTE: Window is functionally identical to FrameView with the following exceptions. 
+//  - Window is a Toplevel
+//  - FrameView Does not support padding (but should)
+//  - FrameView Does not support mouse dragging
+//  - FrameView Does not support IEnumerable
+// Any udpates done here should probably be done in FrameView as well; TODO: Merge these classes
+
 using System.Collections;
 using NStack;
 
@@ -29,7 +36,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-
 		/// <summary>
 		/// ContentView is an internal implementation detail of Window. It is used to host Views added with <see cref="Add(View)"/>. 
 		/// Its ONLY reason for being is to provide a simple way for Window to expose to those SubViews that the Window's Bounds 
@@ -38,21 +44,6 @@ namespace Terminal.Gui {
 		class ContentView : View {
 			public ContentView (Rect frame) : base (frame) { }
 			public ContentView () : base () { }
-#if false
-			public override void Redraw (Rect bounds)
-			{
-				Driver.SetAttribute (ColorScheme.Focus);
-
-				for (int y = 0; y < Frame.Height; y++) {
-					Move (0, y);
-					for (int x = 0; x < Frame.Width; x++) {
-
-						Driver.AddRune ('x');
-					}
-				}
-				base.Redraw (region);
-			}
-#endif
 		}
 
 		/// <summary>
@@ -214,8 +205,21 @@ namespace Terminal.Gui {
 			// a pending mouse event activated.
 
 			int nx, ny;
-			if ((mouseEvent.Flags == (MouseFlags.Button1Pressed | MouseFlags.ReportMousePosition) ||
-				mouseEvent.Flags == MouseFlags.Button3Pressed)) {
+			if (!dragPosition.HasValue && mouseEvent.Flags == (MouseFlags.Button1Pressed)) {
+				// Only start grabbing if the user clicks on the title bar.
+				if (mouseEvent.Y == 0) {
+					start = new Point (mouseEvent.X, mouseEvent.Y);
+					dragPosition = new Point ();
+					nx = mouseEvent.X - mouseEvent.OfX;
+					ny = mouseEvent.Y - mouseEvent.OfY;
+					dragPosition = new Point (nx, ny);
+					Application.GrabMouse (this);
+				}
+
+				//Demo.ml2.Text = $"Starting at {dragPosition}";
+				return true;
+			} else if (mouseEvent.Flags == (MouseFlags.Button1Pressed | MouseFlags.ReportMousePosition) ||
+				mouseEvent.Flags == MouseFlags.Button3Pressed) {
 				if (dragPosition.HasValue) {
 					if (SuperView == null) {
 						Application.Top.SetNeedsDisplay (Frame);
@@ -226,8 +230,8 @@ namespace Terminal.Gui {
 					} else {
 						SuperView.SetNeedsDisplay (Frame);
 					}
-					EnsureVisibleBounds (this, mouseEvent.X + mouseEvent.OfX - start.X,
-						mouseEvent.Y + mouseEvent.OfY, out nx, out ny);
+					EnsureVisibleBounds (this, mouseEvent.X + (SuperView == null ? mouseEvent.OfX - start.X : Frame.X - start.X),
+						mouseEvent.Y + (SuperView == null ? mouseEvent.OfY : Frame.Y), out nx, out ny);
 
 					dragPosition = new Point (nx, ny);
 					Frame = new Rect (nx, ny, Frame.Width, Frame.Height);
@@ -237,19 +241,6 @@ namespace Terminal.Gui {
 
 					// FIXED: optimize, only SetNeedsDisplay on the before/after regions.
 					SetNeedsDisplay ();
-					return true;
-				} else {
-					// Only start grabbing if the user clicks on the title bar.
-					if (mouseEvent.Y == 0) {
-						start = new Point (mouseEvent.X, mouseEvent.Y);
-						dragPosition = new Point ();
-						nx = mouseEvent.X - mouseEvent.OfX;
-						ny = mouseEvent.Y - mouseEvent.OfY;
-						dragPosition = new Point (nx, ny);
-						Application.GrabMouse (this);
-					}
-
-					//Demo.ml2.Text = $"Starting at {dragPosition}";
 					return true;
 				}
 			}
@@ -262,6 +253,30 @@ namespace Terminal.Gui {
 
 			//Demo.ml.Text = me.ToString ();
 			return false;
+		}
+
+		/// <summary>
+		///   The text displayed by the <see cref="Label"/>.
+		/// </summary>
+		public override ustring Text {
+			get => contentView.Text;
+			set {
+				base.Text = value;
+				if (contentView != null) {
+					contentView.Text = value;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Controls the text-alignment property of the label, changing it will redisplay the <see cref="Label"/>.
+		/// </summary>
+		/// <value>The text alignment.</value>
+		public override TextAlignment TextAlignment {
+			get => contentView.TextAlignment;
+			set {
+				base.TextAlignment = contentView.TextAlignment = value;
+			}
 		}
 	}
 }

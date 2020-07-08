@@ -48,6 +48,8 @@ namespace SmartThingsTerminal
 
         public StatusBar StatusBar { get; set; }
 
+        public Button statusButton { get; set; }
+
         public string FormatJson(string json)
         {
             return json?.Replace("\r", "");
@@ -67,7 +69,6 @@ namespace SmartThingsTerminal
                 Width = Dim.Fill(),
                 Height = 5
             };
-
             ErrorView.Text = ustring.Make(message);
         }
 
@@ -111,16 +112,34 @@ namespace SmartThingsTerminal
             });
         }
 
-        public virtual bool SaveUpdates()
+        public virtual bool SaveItem()
         {
             return true;
         }
 
+        public virtual void DeleteItem()
+        {
+            SelectedItem = null;
+            SelectedItemIndex = 0;
+        }
+
         public void EnableEditMode()
         {
-            JsonView.ReadOnly = false;
-            JsonView.ColorScheme = Colors.Menu;
-            HostPane.SetFocus(JsonView);
+            if (SelectedItem != null)
+            {
+                JsonView.ReadOnly = false;
+                JsonView.ColorScheme = Colors.Menu;
+                HostPane.SetFocus(JsonView);
+            }
+        }
+
+        public void DisableEditMode()
+        {
+            if (SelectedItem != null)
+            {
+                JsonView.ReadOnly = true;
+                JsonView.ColorScheme = Colors.Dialog;
+            }
         }
 
         public virtual void ConfigureLeftPane(string title)
@@ -214,7 +233,13 @@ namespace SmartThingsTerminal
                     SelectedItemIndex = classListView.SelectedItem;
                     SelectedItem = displayItemList.Values.ToArray()[classListView.SelectedItem];
                     UpdateJsonView(SelectedItem.ToJson());
+                    HostPane.Text =  displayItemList.Keys.ToArray()[classListView.SelectedItem];
                     UpdateSettings<T>(SelectedItem);
+                };
+
+                classListView.Enter += (args) =>
+                {
+                    DisableEditMode();
                 };
             }
 
@@ -269,11 +294,19 @@ namespace SmartThingsTerminal
 
         public void ShowStatusBarMessage(string text)
         {
-            var statusButton = new Button(text)
+            statusButton = new Button(text)
             {
-                X = Pos.Center(),
-                Y = Pos.Bottom(HostPane) + 4,
+                //X = Pos.Center(),
+                //Y = Pos.Bottom(HostPane) + 4,
+                X =0,
+                Y = Pos.Bottom(HostPane),
                 IsDefault = true,
+                //Height = Dim.Fill(),
+                //Width = Dim.Fill(),
+                Clicked = () =>
+                {
+                    Top.Remove(statusButton);
+                }
             };
             Top.Add(statusButton);
         }
