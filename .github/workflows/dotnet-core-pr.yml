@@ -64,6 +64,6 @@ jobs:
     - name: Upload all pre-release artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: v${{ env.GitVersion_SemVer }}/${{ matrix.runtime }}
+        name: v${{ env.GitVersion_SemVer }}-${{ matrix.runtime }}
         path: publish/v${{ env.GitVersion_SemVer }}/${{ matrix.runtime }}/
 
