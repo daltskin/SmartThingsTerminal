@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8AB9BD79-B877-4441-B6A4-88F1F71EE4E2}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		.github\workflows\dotnet-core-pr.yml = .github\workflows\dotnet-core-pr.yml
 		.github\workflows\dotnet-core.yml = .github\workflows\dotnet-core.yml
 		GitVersion.yml = GitVersion.yml
 		LICENSE.txt = LICENSE.txt
