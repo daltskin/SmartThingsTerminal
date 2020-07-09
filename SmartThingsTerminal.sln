@@ -8,13 +8,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8AB9BD79-B877-4441-B6A4-88F1F71EE4E2}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		.github\workflows\dotnet-core-pr.yml = .github\workflows\dotnet-core-pr.yml
 		.github\workflows\dotnet-core.yml = .github\workflows\dotnet-core.yml
 		GitVersion.yml = GitVersion.yml
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "Terminal.Gui\Terminal.Gui.csproj", "{007B0279-3E5F-440D-A5BC-522415D5ABF1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{0A86A10D-DCD1-4C61-BF22-419BD955333B}"
 	ProjectSection(SolutionItems) = preProject
@@ -22,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{0A86A10D-D
 		docs\home.png = docs\home.png
 		docs\pat.png = docs\pat.png
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "Terminal.Gui\Terminal.Gui.csproj", "{FE1E7CAC-76B6-44B9-BA4F-092A37EAD530}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +34,10 @@ Global
 		{9DF95721-8429-48A4-BFA7-8F1C006E8322}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DF95721-8429-48A4-BFA7-8F1C006E8322}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DF95721-8429-48A4-BFA7-8F1C006E8322}.Release|Any CPU.Build.0 = Release|Any CPU
-		{007B0279-3E5F-440D-A5BC-522415D5ABF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{007B0279-3E5F-440D-A5BC-522415D5ABF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{007B0279-3E5F-440D-A5BC-522415D5ABF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{007B0279-3E5F-440D-A5BC-522415D5ABF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE1E7CAC-76B6-44B9-BA4F-092A37EAD530}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE1E7CAC-76B6-44B9-BA4F-092A37EAD530}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE1E7CAC-76B6-44B9-BA4F-092A37EAD530}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE1E7CAC-76B6-44B9-BA4F-092A37EAD530}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

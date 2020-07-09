@@ -243,7 +243,7 @@ namespace SmartThingsTerminal
                             var locationRules = _rulesApi.ListRules(location.LocationId.ToString());
                             if (locationRules.Items?.Count > 0)
                             {
-                                _allRules.Items ??= new List<SmartThingsNet.Model.Rule>();
+                                _allRules.Items ??= new List<Rule>();
                                 _allRules.Items.AddRange(locationRules.Items);
                             }
                         }
@@ -300,6 +300,16 @@ namespace SmartThingsTerminal
         public Rule UpdateRule(string ruleId, string locationId, RuleRequest ruleRequest)
         {
             return _rulesApi.UpdateRule(ruleId, locationId, ruleRequest);
+        }
+
+        public void CreateRule(string ruleId, RuleRequest ruleRequest)
+        {
+            var retVal = _rulesApi.CreateRule(ruleId, ruleRequest);
+        }
+
+        public Rule DeleteRule(string ruleId, string locationId)
+        {
+            return _rulesApi.DeleteRule(ruleId, locationId);
         }
 
         public Location UpdateLocation(string locationId, UpdateLocationRequest locationRequest)

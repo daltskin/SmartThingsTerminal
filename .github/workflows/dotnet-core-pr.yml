@@ -3,6 +3,13 @@ name: .NET Core
 
 on:
 
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+
   pull_request:
     branches: [ master ]
     paths-ignore: 
@@ -45,7 +52,7 @@ jobs:
       run: dotnet test --no-restore --verbosity normal
 
     - name: Publish ${{ matrix.runtime }}
-      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v${{ env.GitVersion_SemVer }}/${{ matrix.runtime }} -c Release -r ${{ matrix.runtime }} -f netcoreapp3.1 /p:PublishSingleFile=true /p:PublishTrimmed=true /p:AssemblyVersion=${{ env.GitVersion_AssemblySemVer }} /p:FileVersion=${{ env.GitVersion_AssemblySemFileVer }} /p:InformationalVersion=${{ env.GitVersion_InformationalVersion }}
+      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v${{ env.GitVersion_SemVer }}/${{ matrix.runtime }} -c Release -r ${{ matrix.runtime }} -f netcoreapp3.1 /p:PublishSingleFile=true /p:DebugType=None /p:AssemblyVersion=${{ env.GitVersion_AssemblySemVer }} /p:FileVersion=${{ env.GitVersion_AssemblySemFileVer }} /p:InformationalVersion=${{ env.GitVersion_InformationalVersion }}
 
     - name: Zip ${{ matrix.runtime }} release
       uses: papeloto/action-zip@v1
@@ -54,15 +61,9 @@ jobs:
         recursive: true
         dest: v${{ env.GitVersion_SemVer }}-${{ matrix.runtime }}.zip
 
-    - name: Release ${{ env.GitVersion_SemVer }}
-      if: steps.release_check.outputs.skip_build != 'true' && github.event_name != 'pull_request'
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+    - name: Upload all pre-release artifacts
+      uses: actions/upload-artifact@v2
       with:
-        files: |
-          **.zip
-        name: ${{ env.GitVersion_SemVer }}
-        tag_name: ${{ env.GitVersion_SemVer }}
-
+        name: v${{ env.GitVersion_SemVer }}-${{ matrix.runtime }}
+        path: publish/v${{ env.GitVersion_SemVer }}/${{ matrix.runtime }}/
 

@@ -48,24 +48,27 @@ namespace SmartThingsTerminal.Scenarios
 
             ConfigureWindows<Device>(displayItemList, false, false);
 
-            ClassListView.Enter += (args) =>
+            if (ClassListView != null)
             {
-                if (_componentFrame != null)
+                ClassListView.Enter += (args) =>
                 {
-                    HostPane.Remove(_componentFrame);
-                    _componentFrame = null;
-                }
-                if (_componentList != null)
-                {
-                    HostPane.Remove(_componentList);
-                    _componentList = null;
-                }
-                if (_capabilitiesStatusJsonView != null)
-                {
-                    HostPane.Remove(_capabilitiesStatusJsonView);
-                    _capabilitiesStatusJsonView = null;
-                }
-            };
+                    if (_componentFrame != null)
+                    {
+                        HostPane.Remove(_componentFrame);
+                        _componentFrame = null;
+                    }
+                    if (_componentList != null)
+                    {
+                        HostPane.Remove(_componentList);
+                        _componentList = null;
+                    }
+                    if (_capabilitiesStatusJsonView != null)
+                    {
+                        HostPane.Remove(_capabilitiesStatusJsonView);
+                        _capabilitiesStatusJsonView = null;
+                    }
+                };
+            }
         }
 
         public override void ConfigureSettingsPane()
@@ -339,10 +342,6 @@ namespace SmartThingsTerminal.Scenarios
                     Device selectedDevice = (Device)SelectedItem;
                     ConfigureComponentsStatusPane(selectedDevice);
                 }
-            }
-            else
-            { 
-            
             }
         }
     }

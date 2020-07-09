@@ -41,35 +41,38 @@ namespace SmartThingsTerminal.Scenarios
         {
             StatusBar = new StatusBar(new StatusItem[] {
                 new StatusItem(Key.F3, "~F3~ Edit", () => EnableEditMode()),
-                new StatusItem(Key.F4, "~F4~ Save", () => SaveUpdates()),
+                new StatusItem(Key.F4, "~F4~ Save", () => SaveItem()),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
             });
         }
 
-        public override bool SaveUpdates()
+        public override bool SaveItem()
         {
             var json = JsonView?.Text.ToString();
 
-            try
+            if (!string.IsNullOrEmpty(json))
             {
-                var location = JsonConvert.DeserializeObject<Location>(json);
+                try
+                {
+                    var location = JsonConvert.DeserializeObject<Location>(json);
 
-                UpdateLocationRequest locationRequest = new UpdateLocationRequest(
-                    location.Name,
-                    location.Latitude,
-                    location.Longitude,
-                    location.RegionRadius,
-                    location.TemperatureScale,
-                    location.Locale,
-                    location.AdditionalProperties);
+                    UpdateLocationRequest locationRequest = new UpdateLocationRequest(
+                        location.Name,
+                        location.Latitude,
+                        location.Longitude,
+                        location.RegionRadius,
+                        location.TemperatureScale,
+                        location.Locale,
+                        location.AdditionalProperties);
 
-                STClient.UpdateLocation(location.LocationId.ToString(), locationRequest);
-                RefreshScreen();
-            }
-            catch (System.Exception exp)
-            {
-                ShowStatusBarMessage($"Error updating: {exp}");
+                    STClient.UpdateLocation(location.LocationId.ToString(), locationRequest);
+                    RefreshScreen();
+                }
+                catch (System.Exception exp)
+                {
+                    ShowStatusBarMessage($"Error updating: {exp}");
+                }
             }
             return true;
         }

@@ -29,6 +29,9 @@ This CLI tool has the following features:
   * Edit/update room details
 * Rules
   * View rules
+  * Edit rules
+  * Copy rules
+  * Delete rules
 * Scenes
   * View scene details
   * Run scenes

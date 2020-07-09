@@ -7,11 +7,6 @@ on:
     paths-ignore: 
       - 'docs/**'
       - '**.md'
-  pull_request:
-    branches: [ master ]
-    paths-ignore: 
-      - 'docs/**'
-      - '**.md'
 
 jobs:
   buildJob:
@@ -49,7 +44,7 @@ jobs:
       run: dotnet test --no-restore --verbosity normal
 
     - name: Publish ${{ matrix.runtime }}
-      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v${{ env.GitVersion_SemVer }}/${{ matrix.runtime }} -c Release -r ${{ matrix.runtime }} -f netcoreapp3.1 /p:PublishSingleFile=true /p:AssemblyVersion=${{ env.GitVersion_AssemblySemVer }} /p:FileVersion=${{ env.GitVersion_AssemblySemFileVer }} /p:InformationalVersion=${{ env.GitVersion_InformationalVersion }}
+      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v${{ env.GitVersion_SemVer }}/${{ matrix.runtime }} -c Release -r ${{ matrix.runtime }} -f netcoreapp3.1 /p:PublishSingleFile=true /p:DebugType=None /p:AssemblyVersion=${{ env.GitVersion_AssemblySemVer }} /p:FileVersion=${{ env.GitVersion_AssemblySemFileVer }} /p:InformationalVersion=${{ env.GitVersion_InformationalVersion }}
 
     - name: Zip ${{ matrix.runtime }} release
       uses: papeloto/action-zip@v1

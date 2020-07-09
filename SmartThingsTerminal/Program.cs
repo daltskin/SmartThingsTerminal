@@ -1,16 +1,12 @@
 ﻿using CommandLine;
-using CommandLine.Text;
 using NStack;
-using SmartThingsTerminal;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 using Terminal.Gui;
 using Rune = System.Rune;
 
@@ -87,19 +83,15 @@ namespace SmartThingsTerminal
 
             }
 
-            Scenario scenario = GetScenarioToRun();
-            while (scenario != null)
+            Scenario scenario;
+            while ((scenario = GetScenarioToRun()) != null)
             {
                 Application.UseSystemConsole = _useSystemConsole;
                 Application.Init();
                 scenario.Init(Application.Top, _baseColorScheme, _stClient);
                 scenario.Setup();
                 scenario.Run();
-                scenario = GetScenarioToRun();
-                Application.Refresh();
             }
-            if (!_top.Running)
-                Application.Shutdown(true);
         }
 
         /// <summary>
@@ -111,14 +103,123 @@ namespace SmartThingsTerminal
             Application.UseSystemConsole = false;
             Application.Init();
 
-            if (_menu == null)
-            {
-                Setup();
-            }
+            // Set this here because not initilzied until driver is loaded
+            _baseColorScheme = Colors.Base;
 
+            StringBuilder aboutMessage = new StringBuilder();
+            aboutMessage.AppendLine();
+            //aboutMessage.Append(GetAppTitle(true));
+            aboutMessage.AppendLine("SmartThings Terminal");
+            aboutMessage.AppendLine("Terminal for the SmartThings REST API");
+            aboutMessage.AppendLine();
+            aboutMessage.AppendLine("SmartThings REST API: https://smartthings.developer.samsung.com/docs/api-ref/st-api.html");
+            aboutMessage.AppendLine();
+            aboutMessage.AppendLine($"Version: {typeof(Program).Assembly.GetName().Version}");
+            aboutMessage.AppendLine($"Using Terminal.Gui Version: {typeof(Terminal.Gui.Application).Assembly.GetName().Version}");
+            aboutMessage.AppendLine();
+
+            _menu = new MenuBar(new MenuBarItem[] {
+                new MenuBarItem ("_File", new MenuItem [] {
+                    new MenuItem ("_Quit", "", () => Application.RequestStop() )
+                }),
+                new MenuBarItem ("_Color Scheme", CreateColorSchemeMenuItems()),
+				//new MenuBarItem ("_Diagostics", CreateDiagnosticMenuItems()),
+				new MenuBarItem ("_About...", "About this app", () =>  MessageBox.Query ("About SmartThings Terminal", aboutMessage.ToString(), "Ok")),
+            });
+
+            _leftPane = new FrameView("API")
+            {
+                X = 0,
+                Y = 1, // for menu
+                Width = 40,
+                Height = Dim.Fill(1),
+                CanFocus = false,
+            };
+
+            _categories = Scenario.GetAllCategories().OrderBy(c => c).ToList();
+            _categoryListView = new ListView(_categories)
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(0),
+                Height = Dim.Fill(0),
+                AllowsMarking = false,
+                CanFocus = true,
+            };
+            _categoryListView.OpenSelectedItem += (a) =>
+            {
+                _top.SetFocus(_rightPane);
+            };
+            _categoryListView.SelectedItemChanged += CategoryListView_SelectedChanged;
+            _leftPane.Add(_categoryListView);
+
+            TextView appNameView = new TextView() { X = 0, Y = 0, Height = Dim.Fill(), Width = Dim.Fill() };
+            appNameView.ReadOnly = true;
+            appNameView.Text = GetAppTitle(true);
+
+            _appTitlePane = new FrameView()
+            {
+                X = 25,
+                Y = 1, // for menu
+                Width = Dim.Fill(),
+                Height = 9,
+                CanFocus = false
+            };
+            _appTitlePane.Add(appNameView);
+
+            _rightPane = new FrameView("API Description")
+            {
+                X = 25,
+                //Y = 1, // for menu
+                Y = Pos.Bottom(_appTitlePane),
+                Width = Dim.Fill(),
+                Height = Dim.Fill(1),
+                CanFocus = true,
+
+            };
+
+            _nameColumnWidth = Scenario.ScenarioMetadata.GetName(_scenarios.OrderByDescending(t => Scenario.ScenarioMetadata.GetName(t).Length).FirstOrDefault()).Length;
+            _scenarioListView = new ListView()
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(0),
+                Height = Dim.Fill(0),
+                AllowsMarking = false,
+                CanFocus = true,
+            };
+
+            _scenarioListView.OpenSelectedItem += _scenarioListView_OpenSelectedItem;
+            _rightPane.Add(_scenarioListView);
+
+            _categoryListView.SelectedItem = 0;
+            _categoryListView.OnSelectedChanged();
+
+            _capslock = new StatusItem(Key.CharMask, "Caps", null);
+            _numlock = new StatusItem(Key.CharMask, "Num", null);
+            _scrolllock = new StatusItem(Key.CharMask, "Scroll", null);
+
+            _statusBar = new StatusBar(new StatusItem[] {
+                _capslock,
+                _numlock,
+                _scrolllock,
+                new StatusItem(Key.F5, "~F5~ Refresh Data", () => {
+                    _stClient.ResetData();
+                }),
+                new StatusItem(Key.ControlQ, "~CTRL-Q~ Quit", () => {
+                    if (_runningScenario is null){
+						// This causes GetScenarioToRun to return null
+						_runningScenario = null;
+                        Application.RequestStop();
+                    } else {
+                        _runningScenario.RequestStop();
+                    }
+                }),
+            });
+
+            SetColorScheme();
             _top = Application.Top;
             _top.KeyDown += KeyDownHandler;
-
             _top.Add(_menu);
             _top.Add(_leftPane);
             _top.Add(_appTitlePane);
@@ -207,129 +308,6 @@ namespace SmartThingsTerminal
                 menuItems.Add(item);
             }
             return menuItems.ToArray();
-        }
-
-        /// <summary>
-        /// Create all controls. This gets called once and the controls remain with their state between Sceanrio runs.
-        /// </summary>
-        private static void Setup()
-        {
-            // Set this here because not initilzied until driver is loaded
-            _baseColorScheme = Colors.Base;
-
-            StringBuilder aboutMessage = new StringBuilder();
-            aboutMessage.AppendLine();
-            aboutMessage.AppendLine(GetAppTitle());
-            aboutMessage.AppendLine();
-            aboutMessage.AppendLine("SmartThings Terminal - a terminal for the SmartThings REST API");
-            aboutMessage.AppendLine();
-            aboutMessage.AppendLine("SmartThings REST API: https://smartthings.developer.samsung.com/docs/api-ref/st-api.html");
-            aboutMessage.AppendLine();
-            aboutMessage.AppendLine($"Version: {typeof(Program).Assembly.GetName().Version}");
-            aboutMessage.AppendLine($"Using Terminal.Gui Version: {typeof(Terminal.Gui.Application).Assembly.GetName().Version}");
-            aboutMessage.AppendLine();
-
-            _menu = new MenuBar(new MenuBarItem[] {
-                new MenuBarItem ("_File", new MenuItem [] {
-                    new MenuItem ("_Quit", "", () => Application.RequestStop() )
-                }),
-                new MenuBarItem ("_Color Scheme", CreateColorSchemeMenuItems()),
-				//new MenuBarItem ("_Diagostics", CreateDiagnosticMenuItems()),
-				new MenuBarItem ("_About...", "About this app", () =>  MessageBox.Query ("About SmartThings Terminal", aboutMessage.ToString(), "Ok")),
-            });
-
-            _leftPane = new FrameView("API")
-            {
-                X = 0,
-                Y = 1, // for menu
-                Width = 40,
-                Height = Dim.Fill(1),
-                CanFocus = false,
-            };
-
-            _categories = Scenario.GetAllCategories().OrderBy(c => c).ToList();
-            _categoryListView = new ListView(_categories)
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill(0),
-                Height = Dim.Fill(0),
-                AllowsMarking = false,
-                CanFocus = true,
-            };
-            _categoryListView.OpenSelectedItem += (a) =>
-            {
-                _top.SetFocus(_rightPane);
-            };
-            _categoryListView.SelectedItemChanged += CategoryListView_SelectedChanged;
-            _leftPane.Add(_categoryListView);
-
-            Label appNameView = new Label() { X = 0, Y = 0, Height = Dim.Fill(), Width = Dim.Fill() };
-
-            StringBuilder sbTitle = new StringBuilder();
-            appNameView.Text = GetAppTitle();
-
-            _appTitlePane = new FrameView()
-            {
-                X = 25,
-                Y = 1, // for menu
-                Width = Dim.Fill(),
-                Height = 9,
-                CanFocus = false
-            };
-            _appTitlePane.Add(appNameView);
-
-            _rightPane = new FrameView("API Description")
-            {
-                X = 25,
-                //Y = 1, // for menu
-                Y = Pos.Bottom(_appTitlePane),
-                Width = Dim.Fill(),
-                Height = Dim.Fill(1),
-                CanFocus = true,
-
-            };
-
-            _nameColumnWidth = Scenario.ScenarioMetadata.GetName(_scenarios.OrderByDescending(t => Scenario.ScenarioMetadata.GetName(t).Length).FirstOrDefault()).Length;
-            _scenarioListView = new ListView()
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill(0),
-                Height = Dim.Fill(0),
-                AllowsMarking = false,
-                CanFocus = true,
-            };
-
-            _scenarioListView.OpenSelectedItem += _scenarioListView_OpenSelectedItem;
-            _rightPane.Add(_scenarioListView);
-
-            _categoryListView.SelectedItem = 0;
-            _categoryListView.OnSelectedChanged();
-
-            _capslock = new StatusItem(Key.CharMask, "Caps", null);
-            _numlock = new StatusItem(Key.CharMask, "Num", null);
-            _scrolllock = new StatusItem(Key.CharMask, "Scroll", null);
-
-            _statusBar = new StatusBar(new StatusItem[] {
-                _capslock,
-                _numlock,
-                _scrolllock,
-                new StatusItem(Key.F5, "~F5~ Refresh Data", () => {
-                    _stClient.ResetData();
-                }),
-                new StatusItem(Key.ControlQ, "~CTRL-Q~ Quit", () => {
-                    if (_runningScenario is null){
-						// This causes GetScenarioToRun to return null
-						_runningScenario = null;
-                        Application.RequestStop();
-                    } else {
-                        _runningScenario.RequestStop();
-                    }
-                }),
-            });
-
-            SetColorScheme();
         }
 
         private static void _scenarioListView_OpenSelectedItem(EventArgs e)
@@ -459,17 +437,32 @@ namespace SmartThingsTerminal
             _scenarioListView.SelectedItem = 0;
         }
 
-        private static string GetAppTitle()
+        private static string GetAppTitle(bool useNewLine = false)
         {
-            StringBuilder appName = new StringBuilder();
-            appName.AppendLine(@"      _______.___________.___________.  ");
-            appName.AppendLine(@"     /       |           |           |  ");
-            appName.AppendLine(@"    |   (----`---|  |----`---|  |----`  ");
-            appName.AppendLine(@"     \   \       |  |        |  |       ");
-            appName.AppendLine(@" .----)   |mart  |  |hings   |  |erminal");
-            appName.AppendLine(@" |_______/       |__|        |__|       ");
-            appName.AppendLine($" Interactive CLI for SmartThings v{typeof(Program).Assembly.GetName().Version}");
-            return appName.ToString();
+            if (useNewLine)
+            {
+                StringBuilder appName = new StringBuilder();
+                appName.Append("      _______.___________.___________.  \n");
+                appName.Append("     /       |           |           |  \n");
+                appName.Append("    |   (----`---|  |----`---|  |----`  \n");
+                appName.Append("     \\   \\       |  |        |  |       \n");
+                appName.Append(" .----)   |mart  |  |hings   |  |erminal\n");
+                appName.Append(" |_______/       |__|        |__|       \n");
+                appName.Append($" Interactive CLI for SmartThings v{typeof(Program).Assembly.GetName().Version}");
+                return appName.ToString();
+            }
+            else
+            {
+                StringBuilder appName = new StringBuilder();
+                appName.AppendLine(@"      _______.___________.___________.  ");
+                appName.AppendLine(@"     /       |           |           |  ");
+                appName.AppendLine(@"    |   (----`---|  |----`---|  |----`  ");
+                appName.AppendLine(@"     \   \       |  |        |  |       ");
+                appName.AppendLine(@" .----)   |mart  |  |hings   |  |erminal");
+                appName.AppendLine(@" |_______/       |__|        |__|       ");
+                appName.AppendLine($" Interactive CLI for SmartThings v{typeof(Program).Assembly.GetName().Version}");
+                return appName.ToString();
+            }
         }
     }
 }
