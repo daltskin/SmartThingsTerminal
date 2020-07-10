@@ -71,9 +71,7 @@ namespace SmartThingsTerminal.Scenarios
                     string locationId = GetRuleLocation(rule);
                     if (copyCurrent)
                     {
-                        int nameCounter = STClient.GetAllRules().Items.Where(n => n.Name.Equals(rule.Name)).Count();
-                        nameCounter++;
-                        ruleRequest.Name += $"-copy {nameCounter}";
+                        ruleRequest.Name += $"-copy";
                         STClient.CreateRule(locationId, ruleRequest);
                     }
                     else
@@ -155,7 +153,7 @@ namespace SmartThingsTerminal.Scenarios
 
         private void GetDirectoriesAndFileView(string currentDirectory)
         {
-            var files = Directory.GetFiles(currentDirectory, "*").Select(t => t.Substring(t.LastIndexOf(@"\") + 1));
+            var files = Directory.GetFiles(currentDirectory, "*.json").Select(t => t.Substring(t.LastIndexOf(@"\") + 1));
 
             var directoryList = new ListView(files.ToList());
             directoryList.Width = Dim.Fill();
