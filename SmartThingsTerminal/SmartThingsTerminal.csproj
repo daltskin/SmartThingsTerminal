@@ -18,11 +18,15 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
-    <PackageReference Include="SmartThingsNet" Version="0.3.2" />
+    <PackageReference Include="SmartThingsNet" Version="0.3.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Terminal.Gui\Terminal.Gui.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

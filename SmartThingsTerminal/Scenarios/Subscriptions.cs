@@ -13,27 +13,32 @@ namespace SmartThingsTerminal.Scenarios
     {
         public override void Setup()
         {
-            Dictionary<string, dynamic> displayItemList = null;
-
+            Dictionary<string, dynamic> dataItemList = null;
+            Dictionary<string, string> displayItemList = null;
             try
             {
                 if (STClient.GetAllSubscriptions().Items?.Count > 0)
                 {
-                    displayItemList = STClient.GetAllSubscriptions().Items
+                    dataItemList = STClient.GetAllSubscriptions().Items
                        .OrderBy(t => t.Id)
                        .Select(t => new KeyValuePair<string, dynamic>(t.Id, t))
                        .ToDictionary(t => t.Key, t => t.Value);
+
+                    displayItemList = STClient.GetAllSubscriptions().Items
+                        .OrderBy(o => o.Id)
+                        .Select(t => new KeyValuePair<string, string>(t.Id, t.Id))
+                        .ToDictionary(t => t.Key, t => t.Value);
                 }
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
             }
-            catch (System.Exception exp)
+            catch (Exception exp)
             {
-                SetErrorView($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
             }
-            ConfigureWindows<Subscription>(displayItemList);
+            ConfigureWindows<Subscription>(displayItemList, dataItemList);
         }
 
         public override void ConfigureStatusBar()
@@ -69,9 +74,9 @@ namespace SmartThingsTerminal.Scenarios
                     STClient.SaveSubscription(subscription.InstalledAppId, subscriptionRequest);
                     RefreshScreen();
                 }
-                catch (System.Exception exp)
+                catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error updating: {exp.Message}");
+                    ShowErrorMessage($"Error updating: {exp.Message}");
                 }
             }
             return true;
@@ -90,7 +95,7 @@ namespace SmartThingsTerminal.Scenarios
                 }
                 catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error deleting: {exp.Message}");
+                    ShowErrorMessage($"Error deleting: {exp.Message}");
                 }
             }
         }

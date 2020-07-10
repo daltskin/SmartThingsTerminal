@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using RestSharp.Serialization.Json;
-using SmartThingsNet.Model;
+﻿using SmartThingsNet.Model;
 using System.Collections.Generic;
 using System.Linq;
 using Terminal.Gui;
@@ -13,27 +11,32 @@ namespace SmartThingsTerminal.Scenarios
     {
         public override void Setup()
         {
-            Dictionary<string, dynamic> displayItemList = null;
-
+            Dictionary<string, dynamic> dataItemList = null;
+            Dictionary<string, string> displayItemList = null;
             try
             {
                 if (STClient.GetAllScenes().Items?.Count > 0)
                 {
-                    displayItemList = STClient.GetAllScenes().Items
+                    dataItemList = STClient.GetAllScenes().Items
                         .OrderBy(t => t.SceneName)
-                        .Select(t => new KeyValuePair<string, dynamic>(t.SceneName, t))
+                        .Select(t => new KeyValuePair<string, dynamic>(t.SceneId, t))
                         .ToDictionary(t => t.Key, t => t.Value);
+
+                    displayItemList = STClient.GetAllScenes().Items
+                            .OrderBy(o => o.SceneName)
+                            .Select(t => new KeyValuePair<string, string>(t.SceneId, t.SceneName))
+                            .ToDictionary(t => t.Key, t => t.Value);
                 }
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
             }
             catch (System.Exception exp)
             {
-                SetErrorView($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
             }
-            ConfigureWindows<SceneSummary>(displayItemList);
+            ConfigureWindows<SceneSummary>(displayItemList, dataItemList);
         }
 
         public override void ConfigureStatusBar()

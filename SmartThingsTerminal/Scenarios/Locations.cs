@@ -13,28 +13,33 @@ namespace SmartThingsTerminal.Scenarios
     {
         public override void Setup()
         {
-            Dictionary<string, dynamic> displayItemList = null;
-
+            Dictionary<string, dynamic> dataItemList = null;
+            Dictionary<string, string> displayItemList = null;
             try
             {
                 if (STClient.GetAllLocations().Items?.Count > 0)
                 {
+                    dataItemList = STClient.GetAllLocations().Items
+                        .OrderBy(t => t.Name)
+                        .Select(t => new KeyValuePair<string, dynamic>(t.LocationId.ToString(), t))
+                        .ToDictionary(t => t.Key, t => t.Value);
+
                     displayItemList = STClient.GetAllLocations().Items
                         .OrderBy(t => t.Name)
-                        .Select(t => new KeyValuePair<string, dynamic>(t.Name, t))
+                        .Select(t => new KeyValuePair<string, string>(t.LocationId.ToString(), t.Name))
                         .ToDictionary(t => t.Key, t => t.Value);
                 }
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
             }
             catch (System.Exception exp)
             {
-                SetErrorView($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
             }
 
-            ConfigureWindows<Location>(displayItemList);
+            ConfigureWindows<Location>(displayItemList, dataItemList);
         }
 
 
@@ -62,13 +67,9 @@ namespace SmartThingsTerminal.Scenarios
 
                     if (copyCurrent)
                     {
-                        int nameCounter = STClient.GetAllLocations().Items.Where(n => n.Name.Equals(location.Name)).Count();
-                        nameCounter++;
-                        location.Name += $"-copy {nameCounter}";
-
                         var createLocationRequest = new CreateLocationRequest(
-                            name: location.Name,
-                            countryCode: location.CountryCode,
+                            name: location.Name += "-copy",
+                            countryCode: location.CountryCode ?? "USA",
                             latitude: location.Latitude,
                             longitude: location.Longitude,
                             regionRadius: location.RegionRadius,
@@ -94,9 +95,9 @@ namespace SmartThingsTerminal.Scenarios
                     
                     RefreshScreen();
                 }
-                catch (System.Exception exp)
+                catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error updating: {exp}");
+                    ShowErrorMessage($"Error updating: {exp}");
                 }
             }
             return true;
@@ -115,7 +116,7 @@ namespace SmartThingsTerminal.Scenarios
                 }
                 catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error deleting: {exp.Message}");
+                    ShowErrorMessage($"Error deleting: {exp.Message}");
                 }
             }
         }

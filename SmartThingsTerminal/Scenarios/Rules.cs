@@ -16,27 +16,32 @@ namespace SmartThingsTerminal.Scenarios
 
         public override void Setup()
         {
-            Dictionary<string, dynamic> displayItemList = null;
+            Dictionary<string, dynamic> dataItemList = null;
+            Dictionary<string, string> displayItemList = null;
             try
             {
                 if (STClient.GetAllRules().Items?.Count > 0)
                 {
+                    dataItemList = STClient.GetAllRules().Items
+                        .OrderBy(o=> o.Name)
+                        .Select(t => new KeyValuePair<string, dynamic>(t.Id, t))
+                        .ToDictionary(t => t.Key, t => t.Value);
+
                     displayItemList = STClient.GetAllRules().Items
-                        .GroupBy(r => r.Name)
-                        .Select(g => g.First())
-                        .Select(t => new KeyValuePair<string, dynamic>(t.Name, t))
+                        .OrderBy(o => o.Name)
+                        .Select(t => new KeyValuePair<string, string>(t.Id, t.Name))
                         .ToDictionary(t => t.Key, t => t.Value);
                 }
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
             }
-            catch (System.Exception exp)
+            catch (Exception exp)
             {
-                SetErrorView($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
             }
-            ConfigureWindows<Rule>(displayItemList);
+            ConfigureWindows<Rule>(displayItemList, dataItemList);
         }
 
         public override void ConfigureStatusBar()
@@ -77,9 +82,9 @@ namespace SmartThingsTerminal.Scenarios
                     }
                     RefreshScreen();
                 }
-                catch (System.Exception exp)
+                catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error updating: {exp.Message}");
+                    ShowErrorMessage($"Error updating: {exp.Message}");
                 }
             }
             return true;
@@ -98,7 +103,7 @@ namespace SmartThingsTerminal.Scenarios
                 }
                 catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error deleting: {exp.Message}");
+                    ShowErrorMessage($"Error deleting: {exp.Message}");
                 }
             }
         }
@@ -159,26 +164,33 @@ namespace SmartThingsTerminal.Scenarios
             directoryList.OpenSelectedItem += (args) =>
             {
                 string selectedDirectory = ((ListViewItemEventArgs)args).Value.ToString();
-                try
-                {
-                    string json = File.ReadAllText($"{currentDirectory}\\{selectedDirectory}");
-                    var rule = JsonConvert.DeserializeObject<Rule>(json);
-                    RuleRequest ruleRequest = new RuleRequest(rule.Name, rule.Actions, rule.TimeZoneId);
-
-                    // TODO: prompt for which location
-                    string locationId = STClient.GetAllLocations().Items.FirstOrDefault().LocationId.ToString();
-                    var response = STClient.CreateRule(locationId, ruleRequest);
-                    ShowStatusBarMessage($"Rule added!");
-                    ToggleImport();
-                }
-                catch (Exception exp)
-                {
-                    ShowStatusBarMessage($"Error creating rule: {exp.Message}");
-                }
+                ImportRule($"{currentDirectory}\\{selectedDirectory}");
             };
 
             filePicker.Add(directoryList);
             filePicker.SetFocus(directoryList);
+        }
+
+        private void ImportRule(string filePath)
+        {
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                var rule = JsonConvert.DeserializeObject<Rule>(json);
+                RuleRequest ruleRequest = new RuleRequest(rule.Name, rule.Actions, rule.TimeZoneId);
+
+                // TODO: prompt for which location
+                string locationId = STClient.GetAllLocations().Items.FirstOrDefault().LocationId.ToString();
+                var response = STClient.CreateRule(locationId, ruleRequest);
+                ShowStatusBarMessage($"Rule added!");
+                ToggleImport();
+            }
+            catch (Exception exp)
+            {
+                ShowErrorMessage($"Error creating rule: {exp.Message}");
+            }
+
+
         }
     }
 }

@@ -13,26 +13,32 @@ namespace SmartThingsTerminal.Scenarios
     {
         public override void Setup()
         {
-            Dictionary<string, dynamic> displayItemList = null;
+            Dictionary<string, dynamic> dataItemList = null;
+            Dictionary<string, string> displayItemList = null;
             try
             {
                 if (STClient.GetAllSchedules().Items?.Count > 0)
                 {
-                    displayItemList = STClient.GetAllSchedules().Items
+                    dataItemList = STClient.GetAllSchedules().Items
                        .OrderBy(t => t.Name)
                        .Select(t => new KeyValuePair<string, dynamic>(t.Name, t))
                        .ToDictionary(t => t.Key, t => t.Value);
+
+                    displayItemList = STClient.GetAllSchedules().Items
+                        .OrderBy(o => o.Name)
+                        .Select(t => new KeyValuePair<string, string>(t.Name, t.Name))
+                        .ToDictionary(t => t.Key, t => t.Value);
                 }
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
             }
-            catch (System.Exception exp)
+            catch (Exception exp)
             {
-                SetErrorView($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
             }
-            ConfigureWindows<Scenario>(displayItemList);
+            ConfigureWindows<Scenario>(displayItemList, dataItemList);
         }
 
         public override void ConfigureStatusBar()
@@ -58,22 +64,13 @@ namespace SmartThingsTerminal.Scenarios
                         cron: schedule.Cron,
                         name: schedule.Name);
 
-                    if (copyCurrent)
-                    {
-                        int nameCounter = STClient.GetAllSchedules().Items.Where(n => n.Name.Equals(schedule.Name)).Count();
-                        nameCounter++;
-                        scheduleRequest.Name += $"-copy {nameCounter}";
-                        STClient.CreateSchedule(schedule.InstalledAppId.ToString(), scheduleRequest);
-                    }
-                    else
-                    {
-                        var response = STClient.CreateSchedule(schedule.InstalledAppId.ToString(), scheduleRequest);
-                    }
+                    scheduleRequest.Name = Guid.NewGuid().ToString();
+                    STClient.CreateSchedule(schedule.InstalledAppId.ToString(), scheduleRequest);
                     RefreshScreen();
                 }
-                catch (System.Exception exp)
+                catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error updating: {exp.Message}");
+                    ShowErrorMessage($"Error updating: {exp.Message}");
                 }
             }
             return true;
@@ -92,7 +89,7 @@ namespace SmartThingsTerminal.Scenarios
                 }
                 catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error deleting: {exp.Message}");
+                    ShowErrorMessage($"Error deleting: {exp.Message}");
                 }
             }
         }

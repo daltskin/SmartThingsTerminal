@@ -13,26 +13,32 @@ namespace SmartThingsTerminal.Scenarios
     {
         public override void Setup()
         {
-            Dictionary<string, dynamic> displayItemList = null;
+            Dictionary<string, dynamic> dataItemList = null;
+            Dictionary<string, string> displayItemList = null;
             try
             {
                 if (STClient.GetAllRooms().Items?.Count > 0)
                 {
+                    dataItemList = STClient.GetAllRooms().Items
+                        .OrderBy(t => t.Name)
+                        .Select(t => new KeyValuePair<string, dynamic>(t.RoomId.ToString(), t))
+                        .ToDictionary(t => t.Key, t => t.Value);
+
                     displayItemList = STClient.GetAllRooms().Items
                         .OrderBy(t => t.Name)
-                        .Select(t => new KeyValuePair<string, dynamic>(t.Name, t))
+                        .Select(t => new KeyValuePair<string, string>(t.RoomId.ToString(), t.Name))
                         .ToDictionary(t => t.Key, t => t.Value);
                 }
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
             }
-            catch (System.Exception exp)
+            catch (Exception exp)
             {
-                SetErrorView($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
             }
-            ConfigureWindows<Room>(displayItemList);
+            ConfigureWindows<Room>(displayItemList, dataItemList);
         }
 
         public override void ConfigureStatusBar()
@@ -58,10 +64,7 @@ namespace SmartThingsTerminal.Scenarios
                     var room = JsonConvert.DeserializeObject<Room>(json);
                     if (copyCurrent)
                     {
-                        int nameCounter = STClient.GetAllRooms().Items.Where(n => n.Name.Equals(room.Name)).Count();
-                        nameCounter++;
-                        string newRoomName = room.Name += $"-copy {nameCounter}";
-                        var roomRequest = new CreateRoomRequest(newRoomName);
+                        var roomRequest = new CreateRoomRequest(room.Name += "-copy");
                         STClient.CreateRoom(room.LocationId.ToString(), roomRequest);
                     }
                     else
@@ -71,9 +74,9 @@ namespace SmartThingsTerminal.Scenarios
                     }
                     RefreshScreen();
                 }
-                catch (System.Exception exp)
+                catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error updating: {exp}");
+                    ShowErrorMessage($"Error updating: {exp}");
                 }
             }
             return true;
@@ -92,7 +95,7 @@ namespace SmartThingsTerminal.Scenarios
                 }
                 catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error deleting: {exp.Message}");
+                    ShowErrorMessage($"Error deleting: {exp.Message}");
                 }
             }
         }

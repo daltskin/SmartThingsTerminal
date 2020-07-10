@@ -10,28 +10,34 @@ namespace SmartThingsTerminal.Scenarios
     {
         public override void Setup()
         {
-            Dictionary<string, dynamic> displayItemList = null;
+            Dictionary<string, dynamic> dataItemList = null;
+            Dictionary<string, string> displayItemList = null;
 
             try
             {
                 if (STClient.GetAllInstalledApps().Items?.Count > 0)
                 {
-                    displayItemList = STClient.GetAllInstalledApps().Items
+                    dataItemList = STClient.GetAllInstalledApps().Items
                         .OrderBy(t => t.DisplayName)
-                        .Select(t => new KeyValuePair<string, dynamic>(t.DisplayName, t))
+                        .Select(t => new KeyValuePair<string, dynamic>(t.InstalledAppId.ToString(), t))
+                        .ToDictionary(t => t.Key, t => t.Value);
+
+                    displayItemList = STClient.GetAllInstalledApps().Items
+                        .OrderBy(o => o.DisplayName)
+                        .Select(t => new KeyValuePair<string, string>(t.InstalledAppId.ToString(), t.DisplayName))
                         .ToDictionary(t => t.Key, t => t.Value);
                 }
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
             }
             catch (System.Exception exp)
             {
-                SetErrorView($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
             }
 
-            ConfigureWindows<InstalledApp>(displayItemList);
+            ConfigureWindows<InstalledApp>(displayItemList, dataItemList);
         }
     }
 }
