@@ -112,7 +112,7 @@ namespace SmartThingsTerminal
             });
         }
 
-        public virtual bool SaveItem()
+        public virtual bool SaveItem(bool copyCurrent = false)
         {
             return true;
         }
@@ -147,7 +147,7 @@ namespace SmartThingsTerminal
             LeftPane = new Window(title)
             {
                 X = 0,
-                Y = 0, // for menu
+                Y = 0,
                 Width = 40,
                 Height = Dim.Fill(),
                 CanFocus = false,
@@ -233,7 +233,7 @@ namespace SmartThingsTerminal
                     SelectedItemIndex = classListView.SelectedItem;
                     SelectedItem = displayItemList.Values.ToArray()[classListView.SelectedItem];
                     UpdateJsonView(SelectedItem.ToJson());
-                    HostPane.Text =  displayItemList.Keys.ToArray()[classListView.SelectedItem];
+                    HostPane.Title =  displayItemList.Keys.ToArray()[classListView.SelectedItem];
                     UpdateSettings<T>(SelectedItem);
                 };
 
@@ -242,7 +242,6 @@ namespace SmartThingsTerminal
                     DisableEditMode();
                 };
             }
-
             ClassListView = classListView;
             return classListView;
         }

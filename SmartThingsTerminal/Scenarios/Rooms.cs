@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SmartThingsNet.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terminal.Gui;
@@ -40,21 +41,34 @@ namespace SmartThingsTerminal.Scenarios
                 new StatusItem(Key.F3, "~F3~ Edit", () => EnableEditMode()),
                 new StatusItem(Key.F4, "~F4~ Save", () => SaveItem()),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
+                new StatusItem(Key.F6, "~F6~ Copy Room", () => SaveItem(true)),
+                new StatusItem(Key.F9, "~F9~ Delete Room", () => DeleteItem()),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
             });
         }
 
-        public override bool SaveItem()
+        public override bool SaveItem(bool copyCurrent = false)
         {
             var json = JsonView?.Text.ToString();
 
-            if (! string.IsNullOrEmpty(json))
+            if (!string.IsNullOrEmpty(json))
             {
                 try
                 {
                     var room = JsonConvert.DeserializeObject<Room>(json);
-                    UpdateRoomRequest roomRequest = new UpdateRoomRequest(room.Name);
-                    STClient.UpdateRoom(room.LocationId.ToString(), room.RoomId.ToString(), roomRequest);
+                    if (copyCurrent)
+                    {
+                        int nameCounter = STClient.GetAllRooms().Items.Where(n => n.Name.Equals(room.Name)).Count();
+                        nameCounter++;
+                        string newRoomName = room.Name += $"-copy {nameCounter}";
+                        var roomRequest = new CreateRoomRequest(newRoomName);
+                        STClient.CreateRoom(room.LocationId.ToString(), roomRequest);
+                    }
+                    else
+                    {
+                        var roomRequest = new UpdateRoomRequest(room.Name);
+                        STClient.UpdateRoom(room.LocationId.ToString(), room.RoomId.ToString(), roomRequest);
+                    }
                     RefreshScreen();
                 }
                 catch (System.Exception exp)
@@ -63,6 +77,24 @@ namespace SmartThingsTerminal.Scenarios
                 }
             }
             return true;
+        }
+
+        public override void DeleteItem()
+        {
+            if (SelectedItem != null)
+            {
+                Room currentItem = (Room)SelectedItem;
+                try
+                {
+                    STClient.DeleteRoom(currentItem.LocationId.ToString(), currentItem.RoomId.ToString());
+                    base.DeleteItem();
+                    RefreshScreen();
+                }
+                catch (Exception exp)
+                {
+                    ShowStatusBarMessage($"Error deleting: {exp.Message}");
+                }
+            }
         }
     }
 }

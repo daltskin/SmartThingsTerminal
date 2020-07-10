@@ -297,14 +297,24 @@ namespace SmartThingsTerminal
             return _scenesApi.ExecuteScene(sceneId);
         }
 
+        public Device UpdateDevice(string deviceId, UpdateDeviceRequest updateDeviceRequest)
+        {
+            return _devicesApi.UpdateDevice(deviceId, updateDeviceRequest);
+        }
+
+        public object DeleteDevice(string deviceId)
+        {
+            return _devicesApi.DeleteDevice(deviceId);
+        }
+
         public Rule UpdateRule(string ruleId, string locationId, RuleRequest ruleRequest)
         {
             return _rulesApi.UpdateRule(ruleId, locationId, ruleRequest);
         }
 
-        public void CreateRule(string ruleId, RuleRequest ruleRequest)
+        public object CreateRule(string locationId, RuleRequest ruleRequest)
         {
-            var retVal = _rulesApi.CreateRule(ruleId, ruleRequest);
+            return _rulesApi.CreateRule(locationId, ruleRequest);
         }
 
         public Rule DeleteRule(string ruleId, string locationId)
@@ -317,14 +327,54 @@ namespace SmartThingsTerminal
             return _locationsApi.UpdateLocation(locationId, locationRequest);
         }
 
+        public Location CreateLocation(CreateLocationRequest locationRequest)
+        {
+            return _locationsApi.CreateLocation(locationRequest);
+        }
+
+        public object DeleteLocation(string locationId)
+        {
+            return _locationsApi.DeleteLocation(locationId);
+        }
+
         public Room UpdateRoom(string locationId, string roomId, UpdateRoomRequest roomRequest)
         {
             return _roomsApi.UpdateRoom(locationId, roomId, roomRequest);
         }
 
+        public Room CreateRoom(string locationId, CreateRoomRequest roomRequest)
+        {
+            return _roomsApi.CreateRoom(locationId, roomRequest);
+        }
+
+        public object DeleteRoom(string locationId, string roomId)
+        {
+            return _roomsApi.DeleteRoom(locationId, roomId);
+        }
+
         public App UpdateApp(string appName, UpdateAppRequest updateAppRequest)
         {
             return _appsApi.UpdateApp(appName,updateAppRequest);
+        }
+
+        public Schedule CreateSchedule(string installedAppId, ScheduleRequest scheduleRequest)
+        {
+            return _schedulesApi.CreateSchedule(installedAppId, scheduleRequest);
+        }
+
+        public object DeleteSchedule(string installedAppId, string scheduleName)
+        {
+            return _schedulesApi.DeleteSchedule(installedAppId, scheduleName);
+        }
+
+        public Subscription SaveSubscription(string installedAppId, SubscriptionRequest subscriptionRequest)
+        {
+            return _subscriptionsApi.SaveSubscription(installedAppId, subscriptionRequest);
+        }
+
+        public SubscriptionDelete DeleteSubscription(string installedAppId, string subscriptionId)
+        {
+            return _subscriptionsApi.DeleteSubscription(installedAppId, subscriptionId);
         }
 
         protected virtual void Dispose(bool disposing)
