@@ -15,16 +15,39 @@ SmartThings Terminal is a cross platform CLI tool for the SmartThings API, provi
 
 This CLI tool has the following features:
 
-| Screen | View | Import | Run commands | Edit | Save | Copy | Delete |
-| ------ | ------ | ------ | ------ | ------ | ------ |------ |
-|Devices | * | | Toggle devices on/off | | | |
-|Installed Applications| * | |  | | | |
-|Locations | * | | | * | * | * | * |
-|Rooms | * | | | * | * | * | * | 
-|Rules | * | * | | * | * | * | * | 
-|Scenes| * | | Run scenes | | | |
-|Schedules| * | | |  | | * | * |
-|Subscriptions| * | | | | | * | * |
+* View Devices
+  * View all of the registered devices
+  * View device components status
+  * Toggle lights/switches on/off
+* Install Applications
+  * View details of installed applications
+* Locations
+  * View the different location details
+  * Edit/Update location details
+  * Copy locations
+  * Delete locations
+* Rooms
+  * View the rooms in all locations
+  * Edit/update room details
+  * Copy rooms
+  * Delete rooms
+* Rules
+  * View rules
+  * Edit rules
+  * Copy rules
+  * Delete rules
+  * Import rules (from a json file in the current directory)
+* Scenes
+  * View scene details
+  * Run scenes
+* Schedules 
+  * View integration schedules
+  * Copy schedules (untested)
+  * Delete schedules (untested)
+* Subscriptions (untested)
+  * View integration notification events
+  * Copy subscriptions
+  * Delete subscriptions
 
 # Hotkeys
 
@@ -69,42 +92,6 @@ eg:
 ```bash
 $ ./STT -t {accesstoken} -s devices
 ```
-
-# Functionality
-
-* View Devices
-  * View all of the registered devices
-  * View device components status
-  * Toggle lights/switches on/off
-* Install Applications
-  * View details of installed applications
-* Locations
-  * View the different location details
-  * Edit/Update location details
-  * Copy locations
-  * Delete locations
-* Rooms
-  * View the rooms in all locations
-  * Edit/update room details
-  * Copy rooms
-  * Delete rooms
-* Rules
-  * View rules
-  * Edit rules
-  * Copy rules
-  * Delete rules
-  * Import rules (from a json file in the current directory)
-* Scenes
-  * View scene details
-  * Run scenes
-* Schedules 
-  * View integration schedules
-  * Copy schedules (untested)
-  * Delete schedules (untested)
-* Subscriptions (untested)
-  * View integration notification events
-  * Copy subscriptions
-  * Delete subscriptions
 
 # Credits
 

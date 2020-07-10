@@ -164,7 +164,7 @@ namespace SmartThingsTerminal.Scenarios
             directoryList.OpenSelectedItem += (args) =>
             {
                 string selectedDirectory = ((ListViewItemEventArgs)args).Value.ToString();
-                ImportRule($"{currentDirectory}\\{selectedDirectory}");
+                ImportRule($"{currentDirectory}//{selectedDirectory}");
             };
 
             filePicker.Add(directoryList);
