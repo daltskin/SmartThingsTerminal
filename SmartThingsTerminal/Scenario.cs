@@ -1,4 +1,5 @@
-﻿using NStack;
+﻿using Microsoft.CSharp.RuntimeBinder;
+using NStack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -112,7 +113,7 @@ namespace SmartThingsTerminal
             });
         }
 
-        public virtual bool SaveItem()
+        public virtual bool SaveItem(bool copyCurrent = false)
         {
             return true;
         }
@@ -147,7 +148,7 @@ namespace SmartThingsTerminal
             LeftPane = new Window(title)
             {
                 X = 0,
-                Y = 0, // for menu
+                Y = 0,
                 Width = 40,
                 Height = Dim.Fill(),
                 CanFocus = false,
@@ -212,13 +213,12 @@ namespace SmartThingsTerminal
 
         }
 
-        public ListView GetClassListView<T>(Dictionary<string, T> displayItemList)
+        public ListView GetClassListView<T>(Dictionary<string, string> displayItemList)
         {
             ListView classListView = null;
-
             if (displayItemList?.Keys.Count > 0)
             {
-                classListView = new ListView(displayItemList.Keys.ToList())
+                classListView = new ListView(displayItemList.Values.ToList())
                 {
                     X = 0,
                     Y = 0,
@@ -231,9 +231,9 @@ namespace SmartThingsTerminal
                 classListView.SelectedItemChanged += (args) =>
                 {
                     SelectedItemIndex = classListView.SelectedItem;
-                    SelectedItem = displayItemList.Values.ToArray()[classListView.SelectedItem];
+                    SelectedItem = _dataItemList.Values.ToArray()[SelectedItemIndex];
                     UpdateJsonView(SelectedItem.ToJson());
-                    HostPane.Text =  displayItemList.Keys.ToArray()[classListView.SelectedItem];
+                    HostPane.Title = displayItemList.Keys.ToArray()[classListView.SelectedItem];
                     UpdateSettings<T>(SelectedItem);
                 };
 
@@ -242,13 +242,20 @@ namespace SmartThingsTerminal
                     DisableEditMode();
                 };
             }
-
             ClassListView = classListView;
             return classListView;
         }
 
-        public virtual void ConfigureWindows<T>(Dictionary<string, dynamic> displayItemList, bool configureLeftPane = true, bool configureHostPane = true)
+        Dictionary<string, dynamic> _dataItemList = null;
+
+        public virtual void ConfigureWindows<T>(
+            Dictionary<string, string> displayItemList, 
+            Dictionary<string, dynamic> dataItemList, 
+            bool configureLeftPane = true, 
+            bool configureHostPane = true)
         {
+            _dataItemList = dataItemList;
+
             if (configureLeftPane)
             {
                 ConfigureLeftPane(GetName());
@@ -262,7 +269,7 @@ namespace SmartThingsTerminal
 
             if (displayItemList?.Count > 0)
             {
-                var itemListView = GetClassListView(displayItemList);
+                var itemListView = GetClassListView<T>(displayItemList);
                 LeftPane.Add(itemListView);
             }
 
@@ -279,9 +286,7 @@ namespace SmartThingsTerminal
 
             if (displayItemList?.Count > 0)
             {
-                dynamic itemToSelect = SelectedItem ?? displayItemList?.FirstOrDefault().Value;
-                ClassListView.SelectedItem = SelectedItemIndex;
-
+                dynamic itemToSelect = SelectedItem ?? dataItemList?.FirstOrDefault().Value;
                 UpdateJsonView(itemToSelect.ToJson());
                 if (SettingsPane != null)
                 {
@@ -292,17 +297,18 @@ namespace SmartThingsTerminal
             DisplayErrorView();
         }
 
+        public void ShowErrorMessage(string text)
+        {
+            MessageBox.Query("SmartThings Terminal", Environment.NewLine + text, "Ok");
+        }
+
         public void ShowStatusBarMessage(string text)
         {
             statusButton = new Button(text)
             {
-                //X = Pos.Center(),
-                //Y = Pos.Bottom(HostPane) + 4,
-                X =0,
+                X = 0,
                 Y = Pos.Bottom(HostPane),
                 IsDefault = true,
-                //Height = Dim.Fill(),
-                //Width = Dim.Fill(),
                 Clicked = () =>
                 {
                     Top.Remove(statusButton);

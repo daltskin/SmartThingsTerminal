@@ -18,36 +18,39 @@ namespace SmartThingsTerminal.Scenarios
         private ListView _componentList;
         private FrameView _componentFrame;
         private int _selectedCapabilityIndex = 0;
-        private Dictionary<string, AttributeState> _selectedCapabilityState;
 
         public override void Setup()
         {
             ConfigureLeftPane(GetName());
             ConfigureSettingsPane();
 
-            Dictionary<string, dynamic> displayItemList = null;
-
+            Dictionary<string, dynamic> dataItemList = null;
+            Dictionary<string, string> displayItemList = null;
             try
             {
                 if (STClient.GetAllDevices().Items?.Count > 0)
                 {
-                    displayItemList = STClient.GetAllDevices().Items
+                    dataItemList = STClient.GetAllDevices().Items
                         .OrderBy(t => t.Name)
-                        .Select(t => new KeyValuePair<string, dynamic>(t.Label, t))
+                        .Select(t => new KeyValuePair<string, dynamic>(t.DeviceId, t))
                         .ToDictionary(t => t.Key, t => t.Value);
+
+                    displayItemList = STClient.GetAllDevices().Items
+                    .OrderBy(o => o.Name)
+                    .Select(t => new KeyValuePair<string, string>(t.DeviceId, t.Label))
+                    .ToDictionary(t => t.Key, t => t.Value);
                 }
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                SetErrorView($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
             }
-            catch (System.Exception exp)
+            catch (Exception exp)
             {
-                SetErrorView($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
             }
 
-            ConfigureWindows<Device>(displayItemList, false, false);
-
+            ConfigureWindows<Device>(displayItemList, dataItemList, false, false);
             if (ClassListView != null)
             {
                 ClassListView.Enter += (args) =>
@@ -108,7 +111,7 @@ namespace SmartThingsTerminal.Scenarios
         {
             Device device = (Device)selectedItem;
 
-            _deviceDetailsFrame.Clear();
+            _deviceDetailsFrame.RemoveAll();
 
             var labelId = new Label("Id:") { X = 0, Y = 0 };
             _deviceDetailsFrame.Add(labelId);
@@ -131,7 +134,7 @@ namespace SmartThingsTerminal.Scenarios
             _deviceDetailsFrame.Add(deviceComponents);
 
             // Device Location pane
-            _deviceLocationFrame.Clear();
+            _deviceLocationFrame.RemoveAll();
 
             string locationName = "";
             if (device.LocationId != null)
@@ -239,11 +242,11 @@ namespace SmartThingsTerminal.Scenarios
                 }
                 catch (SmartThingsNet.Client.ApiException exp)
                 {
-                    ShowStatusBarMessage($"Error: {exp.ErrorCode}");
+                    ShowErrorMessage($"Error: {exp.ErrorCode}");
                 }
-                catch (System.Exception exp)
+                catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error: {exp.Message}");
+                    ShowErrorMessage($"Error: {exp.Message}");
                 }
             }
         }
@@ -282,9 +285,9 @@ namespace SmartThingsTerminal.Scenarios
                     // https://api.smartthings.com/v1/devices/{guid}/components/main/capabilities/configuration/status
                     _capabilitiesStatusJsonView.Text = $"Error executing: {exp.ErrorCode}";
                 }
-                catch (System.Exception exp)
+                catch (Exception exp)
                 {
-                    ShowStatusBarMessage($"Error: {exp.Message}");
+                    ShowErrorMessage($"Error: {exp.Message}");
                 }
             }
         }
@@ -300,8 +303,6 @@ namespace SmartThingsTerminal.Scenarios
 
                 if (componentCapabilityStatus != null)
                 {
-                    _selectedCapabilityState = componentCapabilityStatus;
-
                     StringBuilder sb = new StringBuilder();
                     foreach (var capabilityStatus in componentCapabilityStatus)
                     {
@@ -319,7 +320,7 @@ namespace SmartThingsTerminal.Scenarios
             }
             catch (System.Exception exp)
             {
-                ShowStatusBarMessage($"Error: {exp.Message}");
+                ShowErrorMessage($"Error: {exp.Message}");
             }
         }
 
