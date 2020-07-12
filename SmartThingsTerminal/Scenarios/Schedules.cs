@@ -32,11 +32,11 @@ namespace SmartThingsTerminal.Scenarios
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
             }
             catch (Exception exp)
             {
-                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Error {exp.Message}");
             }
             ConfigureWindows<Scenario>(displayItemList, dataItemList);
         }
@@ -68,9 +68,13 @@ namespace SmartThingsTerminal.Scenarios
                     STClient.CreateSchedule(schedule.InstalledAppId.ToString(), scheduleRequest);
                     RefreshScreen();
                 }
+                catch (SmartThingsNet.Client.ApiException exp)
+                {
+                    ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
+                }
                 catch (Exception exp)
                 {
-                    ShowErrorMessage($"Error updating: {exp.Message}");
+                    ShowErrorMessage($"Error {exp.Message}");
                 }
             }
             return true;
@@ -87,9 +91,13 @@ namespace SmartThingsTerminal.Scenarios
                     base.DeleteItem();
                     RefreshScreen();
                 }
+                catch (SmartThingsNet.Client.ApiException exp)
+                {
+                    ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
+                }
                 catch (Exception exp)
                 {
-                    ShowErrorMessage($"Error deleting: {exp.Message}");
+                    ShowErrorMessage($"Error {exp.Message}");
                 }
             }
         }

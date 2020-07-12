@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using Terminal.Gui;
 using Rune = System.Rune;
@@ -145,6 +146,7 @@ namespace SmartThingsTerminal
                 Height = Dim.Fill(0),
                 AllowsMarking = false,
                 CanFocus = true,
+                //HotKeySpecifier = (System.Rune)'_'
             };
             _categoryListView.OpenSelectedItem += (a) =>
             {
@@ -153,17 +155,24 @@ namespace SmartThingsTerminal
             _categoryListView.SelectedItemChanged += CategoryListView_SelectedChanged;
             _leftPane.Add(_categoryListView);
 
-            TextView appNameView = new TextView() { X = 0, Y = 0, Height = Dim.Fill(), Width = Dim.Fill() };
-            appNameView.ReadOnly = true;
-            appNameView.Text = GetAppTitle(true);
-
+            TextView appNameView = new TextView() { 
+                X = 0, 
+                Y = 0, 
+                Height = Dim.Fill(), 
+                Width = Dim.Fill(), 
+                CanFocus = false, 
+                ReadOnly = true, 
+                Text = GetAppTitle(true) 
+            };
+            
+            //Label appNameView = new Label() { X = 0, Y = 0, Height = Dim.Fill(), Width = Dim.Fill(), CanFocus = false, Text = "some text" };
             _appTitlePane = new FrameView()
             {
                 X = 25,
                 Y = 1, // for menu
                 Width = Dim.Fill(),
                 Height = 9,
-                CanFocus = false
+                CanFocus = false,
             };
             _appTitlePane.Add(appNameView);
 
@@ -175,7 +184,6 @@ namespace SmartThingsTerminal
                 Width = Dim.Fill(),
                 Height = Dim.Fill(1),
                 CanFocus = true,
-
             };
 
             _nameColumnWidth = Scenario.ScenarioMetadata.GetName(_scenarios.OrderByDescending(t => Scenario.ScenarioMetadata.GetName(t).Length).FirstOrDefault()).Length;

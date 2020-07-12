@@ -43,11 +43,11 @@ namespace SmartThingsTerminal.Scenarios
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
             }
             catch (Exception exp)
             {
-                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Error {exp.Message}");
             }
 
             ConfigureWindows<Device>(displayItemList, dataItemList, false, false);
@@ -242,11 +242,11 @@ namespace SmartThingsTerminal.Scenarios
                 }
                 catch (SmartThingsNet.Client.ApiException exp)
                 {
-                    ShowErrorMessage($"Error: {exp.ErrorCode}");
+                    ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
                 }
                 catch (Exception exp)
                 {
-                    ShowErrorMessage($"Error: {exp.Message}");
+                    ShowErrorMessage($"Error {exp.Message}");
                 }
             }
         }
@@ -281,13 +281,11 @@ namespace SmartThingsTerminal.Scenarios
                 }
                 catch (SmartThingsNet.Client.ApiException exp)
                 {
-                    // 403 errors can come from trying to read inaccessible component status eg:
-                    // https://api.smartthings.com/v1/devices/{guid}/components/main/capabilities/configuration/status
-                    _capabilitiesStatusJsonView.Text = $"Error executing: {exp.ErrorCode}";
+                    ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
                 }
                 catch (Exception exp)
                 {
-                    ShowErrorMessage($"Error: {exp.Message}");
+                    ShowErrorMessage($"Error {exp.Message}");
                 }
             }
         }
@@ -318,9 +316,9 @@ namespace SmartThingsTerminal.Scenarios
                 // https://api.smartthings.com/v1/devices/{guid}/components/main/capabilities/configuration/status
                 _capabilitiesStatusJsonView.Text = $"Error: {exp.ErrorCode}";
             }
-            catch (System.Exception exp)
+            catch (Exception exp)
             {
-                ShowErrorMessage($"Error: {exp.Message}");
+                ShowErrorMessage($"Error {exp.Message}");
             }
         }
 
