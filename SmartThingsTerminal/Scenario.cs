@@ -29,23 +29,7 @@ namespace SmartThingsTerminal
 
         public Label ErrorView { get; set; }
 
-        public TextView JsonView
-        {
-            get
-            {
-                foreach (var sv in HostPane.Subviews)
-                {
-                    if (sv.Subviews.Count > 0)
-                    {
-                        if (sv.Subviews?.FirstOrDefault().GetType() == typeof(TextView))
-                        {
-                            return (TextView)sv.Subviews?.FirstOrDefault();
-                        }
-                    }
-                }
-                return null;
-            }
-        }
+        public TextView JsonView { get; set; }
 
         public StatusBar StatusBar { get; set; }
 
@@ -172,27 +156,25 @@ namespace SmartThingsTerminal
                 Height = Dim.Fill(1), // + 1 for status bar
                 ColorScheme = Colors.Dialog,
             };
-
-            var jsonPane = ConfigureJsonPane();
-
-            HostPane.Add(jsonPane);
+            ConfigureJsonPane();
         }
 
-        public TextView ConfigureJsonPane()
+        public void ConfigureJsonPane()
         {
-            var view = new TextView()
+            JsonView = new TextView()
             {
                 X = 0,
                 Y = 0,
                 Width = Dim.Fill(),
-                Height = Dim.Fill()
+                Height = Dim.Fill(),
             };
 
-            view.ReadOnly = true;
+            JsonView.ReadOnly = true;
 
             // Set the colorscheme to make it stand out
-            view.ColorScheme = Colors.Dialog;
-            return view;
+            JsonView.ColorScheme = Colors.Dialog;
+
+            HostPane.Add(JsonView);
         }
 
         public virtual void ConfigureSettingsPane()
@@ -230,11 +212,19 @@ namespace SmartThingsTerminal
 
                 classListView.SelectedItemChanged += (args) =>
                 {
-                    SelectedItemIndex = classListView.SelectedItem;
-                    SelectedItem = _dataItemList.Values.ToArray()[SelectedItemIndex];
-                    UpdateJsonView(SelectedItem.ToJson());
-                    HostPane.Title = displayItemList.Keys.ToArray()[classListView.SelectedItem];
-                    UpdateSettings<T>(SelectedItem);
+                    try
+                    {
+                        SelectedItemIndex = classListView.SelectedItem;
+                        SelectedItem = _dataItemList.Values.ToArray()[SelectedItemIndex];
+                        UpdateJsonView(SelectedItem.ToJson());
+                        HostPane.Title = displayItemList.Keys.ToArray()[classListView.SelectedItem];
+                        UpdateSettings<T>(SelectedItem);
+                    }
+                    catch (Exception)
+                    {
+                        // eat
+                        // Troubleshooting: https://github.com/daltskin/SmartThingsTerminal/issues/8
+                    }
                 };
 
                 classListView.Enter += (args) =>
@@ -299,7 +289,7 @@ namespace SmartThingsTerminal
 
         public void ShowErrorMessage(string text)
         {
-            MessageBox.Query("SmartThings Terminal", Environment.NewLine + text, "Ok");
+            MessageBox.ErrorQuery("SmartThings Terminal", Environment.NewLine + text, "Ok");
         }
 
         public void ShowStatusBarMessage(string text)

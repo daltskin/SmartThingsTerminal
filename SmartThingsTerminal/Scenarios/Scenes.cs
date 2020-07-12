@@ -1,4 +1,5 @@
 ﻿using SmartThingsNet.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terminal.Gui;
@@ -30,11 +31,11 @@ namespace SmartThingsTerminal.Scenarios
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
             }
-            catch (System.Exception exp)
+            catch (Exception exp)
             {
-                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Error {exp.Message}");
             }
             ConfigureWindows<SceneSummary>(displayItemList, dataItemList);
         }
@@ -52,8 +53,19 @@ namespace SmartThingsTerminal.Scenarios
         {
             if (SelectedItem != null)
             {
-                var response = STClient.RunScene(((SceneSummary)SelectedItem).SceneId);
-                ShowStatusBarMessage($"Execution: {response.Status}");
+                try
+                {
+                    var response = STClient.RunScene(((SceneSummary)SelectedItem).SceneId);
+                    ShowStatusBarMessage($"Execution: {response.Status}");
+                }
+                catch (SmartThingsNet.Client.ApiException exp)
+                {
+                    ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
+                }
+                catch (Exception exp)
+                {
+                    ShowErrorMessage($"Error {exp.Message}");
+                }
             }
         }
     }

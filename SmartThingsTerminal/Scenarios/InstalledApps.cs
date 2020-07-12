@@ -1,4 +1,5 @@
 ﻿using SmartThingsNet.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -30,11 +31,11 @@ namespace SmartThingsTerminal.Scenarios
             }
             catch (SmartThingsNet.Client.ApiException exp)
             {
-                ShowErrorMessage($"Error calling API: {exp.Source} {exp.ErrorCode} {exp.Message}");
+                ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
             }
-            catch (System.Exception exp)
+            catch (Exception exp)
             {
-                ShowErrorMessage($"Unknown error calling API: {exp.Message}");
+                ShowErrorMessage($"Error {exp.Message}");
             }
 
             ConfigureWindows<InstalledApp>(displayItemList, dataItemList);

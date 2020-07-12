@@ -95,6 +95,10 @@ namespace SmartThingsTerminal.Scenarios
                     
                     RefreshScreen();
                 }
+                catch (SmartThingsNet.Client.ApiException exp)
+                {
+                    ShowErrorMessage($"Error: {exp.ErrorCode} {Environment.NewLine} {exp.Message}");
+                }
                 catch (Exception exp)
                 {
                     ShowErrorMessage($"Error updating: {exp}");
