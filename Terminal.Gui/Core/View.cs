@@ -123,6 +123,7 @@ namespace Terminal.Gui {
 		Direction focusDirection;
 
 		TextFormatter textFormatter;
+		bool wordWrapText;
 
 		/// <summary>
 		/// Event fired when a subview is being added to this view.
@@ -163,6 +164,11 @@ namespace Terminal.Gui {
 		/// Gets or sets the HotKey defined for this view. A user pressing HotKey on the keyboard while this view has focus will cause the Clicked event to fire.
 		/// </summary>
 		public Key HotKey { get => textFormatter.HotKey; set => textFormatter.HotKey = value; }
+
+		/// <summary>
+		/// Word wrap text boolean
+		/// </summary>
+		public bool WordWrapText { get => textFormatter.WordWrapText; set => textFormatter.WordWrapText = value; }
 
 		/// <summary>
 		/// Gets or sets the specifier character for the hotkey (e.g. '_'). Set to '\xffff' to disable hotkey support for this View instance. The default is '\xffff'. 
