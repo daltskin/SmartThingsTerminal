@@ -1,7 +1,8 @@
-﻿using Microsoft.CSharp.RuntimeBinder;
+﻿using Newtonsoft.Json;
 using NStack;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Terminal.Gui;
 
@@ -33,7 +34,9 @@ namespace SmartThingsTerminal
 
         public StatusBar StatusBar { get; set; }
 
-        public Button statusButton { get; set; }
+        public Button StatusButton { get; set; }
+
+        public MenuBar MenuBar { get; set; }
 
         public string FormatJson(string json)
         {
@@ -43,26 +46,6 @@ namespace SmartThingsTerminal
         public virtual void UpdateJsonView(string json)
         {
             JsonView.Text = ustring.Make(FormatJson(json));
-        }
-
-        public virtual void SetErrorView(string message)
-        {
-            ErrorView = new Label()
-            {
-                X = Pos.Center(),
-                Y = Pos.Center(),
-                Width = Dim.Fill(),
-                Height = 5
-            };
-            ErrorView.Text = ustring.Make(message);
-        }
-
-        public virtual void DisplayErrorView()
-        {
-            if (ErrorView != null)
-            {
-                HostPane.Add(ErrorView);
-            }
         }
 
         public virtual void ClearClass(View view)
@@ -132,7 +115,7 @@ namespace SmartThingsTerminal
             LeftPane = new Window(title)
             {
                 X = 0,
-                Y = 0,
+                Y = 1,
                 Width = 40,
                 Height = Dim.Fill(),
                 CanFocus = false,
@@ -142,7 +125,7 @@ namespace SmartThingsTerminal
 
         public virtual void ConfigureHostPane(string title)
         {
-            Pos settingsY = new Pos();
+            Pos settingsY = 1;
             if (SettingsPane?.Subviews.Count > 0)
             {
                 settingsY = Pos.Bottom(SettingsPane);
@@ -153,7 +136,7 @@ namespace SmartThingsTerminal
                 X = Pos.Right(LeftPane),
                 Y = settingsY,
                 Width = Dim.Fill(),
-                Height = Dim.Fill(1), // + 1 for status bar
+                Height = Dim.Fill(), // + 1 for status bar
                 ColorScheme = Colors.Dialog,
             };
             ConfigureJsonPane();
@@ -182,7 +165,7 @@ namespace SmartThingsTerminal
             SettingsPane = new FrameView("Settings")
             {
                 X = Pos.Right(LeftPane),
-                Y = 0, // for menu
+                Y = 1, // for menu
                 Width = Dim.Fill(),
                 Height = 8,
                 CanFocus = false,
@@ -207,7 +190,7 @@ namespace SmartThingsTerminal
                     Width = Dim.Fill(0),
                     Height = Dim.Fill(), // for status bar
                     AllowsMarking = false,
-                    ColorScheme = Colors.TopLevel,
+                    ColorScheme = Colors.TopLevel
                 };
 
                 classListView.SelectedItemChanged += (args) =>
@@ -236,6 +219,19 @@ namespace SmartThingsTerminal
             return classListView;
         }
 
+        public virtual void ExportItem()
+        {
+            if (SelectedItem != null)
+            {
+                string json = JsonConvert.SerializeObject(SelectedItem);
+                string id = _dataItemList.Keys.ToArray()[SelectedItemIndex];
+                string filePathName = $"{Directory.GetCurrentDirectory()}//{SelectedItem.GetType().Name}_{id}.json";
+                File.WriteAllText(filePathName, json);
+
+                ShowMessage($"Exported: {SelectedItem.GetType().Name}_{id}.json");
+            }
+        }
+        
         Dictionary<string, dynamic> _dataItemList = null;
 
         public virtual void ConfigureWindows<T>(
@@ -263,13 +259,15 @@ namespace SmartThingsTerminal
                 LeftPane.Add(itemListView);
             }
 
+            var _menu = MenuHelper.GetStandardMenuBar(Top.ColorScheme, ExportItem);
+
             if (SettingsPane == null)
             {
-                Top.Add(LeftPane, HostPane);
+                Top.Add(_menu, LeftPane, HostPane);
             }
             else
             {
-                Top.Add(LeftPane, SettingsPane, HostPane);
+                Top.Add(_menu, LeftPane, SettingsPane, HostPane);
             }
 
             Top.Add(StatusBar);
@@ -283,28 +281,31 @@ namespace SmartThingsTerminal
                     UpdateSettings<T>(itemToSelect);
                 }
             }
-
-            DisplayErrorView();
         }
 
         public void ShowErrorMessage(string text)
         {
-            MessageBox.ErrorQuery("SmartThings Terminal", Environment.NewLine + text, "Ok");
+            MessageBox.ErrorQuery("SmartThings Terminal", $"\n{text}", "Ok");
+        }
+
+        public void ShowMessage(string text)
+        {
+            MessageBox.Query("SmartThings Terminal", $"\n{text}", "Ok");
         }
 
         public void ShowStatusBarMessage(string text)
         {
-            statusButton = new Button(text)
+            StatusButton = new Button(text)
             {
                 X = 0,
                 Y = Pos.Bottom(HostPane),
                 IsDefault = true,
                 Clicked = () =>
                 {
-                    Top.Remove(statusButton);
+                    Top.Remove(StatusButton);
                 }
             };
-            Top.Add(statusButton);
+            Top.Add(StatusButton);
         }
 
         /// <summary>

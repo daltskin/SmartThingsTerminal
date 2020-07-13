@@ -31,12 +31,12 @@ namespace SmartThingsTerminal.Scenarios
                 if (STClient.GetAllDevices().Items?.Count > 0)
                 {
                     dataItemList = STClient.GetAllDevices().Items
-                        .OrderBy(t => t.Name)
+                        .OrderBy(t => t.Label)
                         .Select(t => new KeyValuePair<string, dynamic>(t.DeviceId, t))
                         .ToDictionary(t => t.Key, t => t.Value);
 
                     displayItemList = STClient.GetAllDevices().Items
-                    .OrderBy(o => o.Name)
+                    .OrderBy(o => o.Label)
                     .Select(t => new KeyValuePair<string, string>(t.DeviceId, t.Label))
                     .ToDictionary(t => t.Key, t => t.Value);
                 }
@@ -79,7 +79,7 @@ namespace SmartThingsTerminal.Scenarios
             SettingsPane = new FrameView("Settings")
             {
                 X = Pos.Right(LeftPane),
-                Y = 0, // for menu
+                Y = 1, // for menu
                 Width = Dim.Fill(),
                 Height = 8,
                 CanFocus = false,

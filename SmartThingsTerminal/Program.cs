@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
 using Terminal.Gui;
 using Rune = System.Rune;
 
@@ -107,26 +105,7 @@ namespace SmartThingsTerminal
             // Set this here because not initilzied until driver is loaded
             _baseColorScheme = Colors.Base;
 
-            StringBuilder aboutMessage = new StringBuilder();
-            aboutMessage.AppendLine();
-            //aboutMessage.Append(GetAppTitle(true));
-            aboutMessage.AppendLine("SmartThings Terminal");
-            aboutMessage.AppendLine("Terminal for the SmartThings REST API");
-            aboutMessage.AppendLine();
-            aboutMessage.AppendLine("SmartThings REST API: https://smartthings.developer.samsung.com/docs/api-ref/st-api.html");
-            aboutMessage.AppendLine();
-            aboutMessage.AppendLine($"Version: {typeof(Program).Assembly.GetName().Version}");
-            aboutMessage.AppendLine($"Using Terminal.Gui Version: {typeof(Terminal.Gui.Application).Assembly.GetName().Version}");
-            aboutMessage.AppendLine();
-
-            _menu = new MenuBar(new MenuBarItem[] {
-                new MenuBarItem ("_File", new MenuItem [] {
-                    new MenuItem ("_Quit", "", () => Application.RequestStop() )
-                }),
-                new MenuBarItem ("_Color Scheme", CreateColorSchemeMenuItems()),
-				//new MenuBarItem ("_Diagostics", CreateDiagnosticMenuItems()),
-				new MenuBarItem ("_About...", "About this app", () =>  MessageBox.Query ("About SmartThings Terminal", aboutMessage.ToString(), "Ok")),
-            });
+            _menu = MenuHelper.GetStandardMenuBar(_baseColorScheme);
 
             _leftPane = new FrameView("API")
             {
@@ -155,17 +134,7 @@ namespace SmartThingsTerminal
             _categoryListView.SelectedItemChanged += CategoryListView_SelectedChanged;
             _leftPane.Add(_categoryListView);
 
-            TextView appNameView = new TextView() { 
-                X = 0, 
-                Y = 0, 
-                Height = Dim.Fill(), 
-                Width = Dim.Fill(), 
-                CanFocus = false, 
-                ReadOnly = true, 
-                Text = GetAppTitle(true) 
-            };
-            
-            //Label appNameView = new Label() { X = 0, Y = 0, Height = Dim.Fill(), Width = Dim.Fill(), CanFocus = false, Text = "some text" };
+            Label appNameView = new Label() { X = 0, Y = 0, Height = Dim.Fill(), Width = Dim.Fill(), CanFocus = false, Text = MenuHelper.GetAppTitle(true) };
             _appTitlePane = new FrameView()
             {
                 X = 25,
@@ -225,7 +194,7 @@ namespace SmartThingsTerminal
                 }),
             });
 
-            SetColorScheme();
+            MenuHelper.SetColorScheme(_baseColorScheme);
             _top = Application.Top;
             _top.KeyDown += KeyDownHandler;
             _top.Add(_menu);
@@ -243,80 +212,13 @@ namespace SmartThingsTerminal
                 }
             };
 
+            _top.SetNeedsDisplay();
             Application.Run(_top, false);
             Application.Shutdown(false);
             return _runningScenario;
         }
 
-        static MenuItem[] CreateDiagnosticMenuItems()
-        {
-            MenuItem CheckedMenuMenuItem(ustring menuItem, Action action, Func<bool> checkFunction)
-            {
-                var mi = new MenuItem();
-                mi.Title = menuItem;
-                mi.CheckType |= MenuItemCheckStyle.Checked;
-                mi.Checked = checkFunction();
-                mi.Action = () =>
-                {
-                    action?.Invoke();
-                    mi.Title = menuItem;
-                    mi.Checked = checkFunction();
-                };
-                return mi;
-            }
-
-            return new MenuItem[] {
-                CheckedMenuMenuItem ("Use _System Console",
-                    () => {
-                        _useSystemConsole = !_useSystemConsole;
-                    },
-                    () => _useSystemConsole),
-                CheckedMenuMenuItem ("Diagnostics: _Frame Padding",
-                    () => {
-                        ConsoleDriver.Diagnostics ^= ConsoleDriver.DiagnosticFlags.FramePadding;
-                        _top.SetNeedsDisplay ();
-                    },
-                    () => (ConsoleDriver.Diagnostics & ConsoleDriver.DiagnosticFlags.FramePadding) == ConsoleDriver.DiagnosticFlags.FramePadding),
-                CheckedMenuMenuItem ("Diagnostics: Frame _Ruler",
-                    () => {
-                        ConsoleDriver.Diagnostics ^= ConsoleDriver.DiagnosticFlags.FrameRuler;
-                        _top.SetNeedsDisplay ();
-                    },
-                    () => (ConsoleDriver.Diagnostics & ConsoleDriver.DiagnosticFlags.FrameRuler) == ConsoleDriver.DiagnosticFlags.FrameRuler),
-            };
-        }
-
-        static void SetColorScheme()
-        {
-            _leftPane.ColorScheme = _baseColorScheme;
-            _rightPane.ColorScheme = _baseColorScheme;
-            _appTitlePane.ColorScheme = _baseColorScheme;
-            _top?.SetNeedsDisplay();
-        }
-
         static ColorScheme _baseColorScheme;
-        static MenuItem[] CreateColorSchemeMenuItems()
-        {
-            List<MenuItem> menuItems = new List<MenuItem>();
-            foreach (var sc in Colors.ColorSchemes)
-            {
-                var item = new MenuItem();
-                item.Title = sc.Key;
-                item.CheckType |= MenuItemCheckStyle.Radio;
-                item.Checked = sc.Value == _baseColorScheme;
-                item.Action += () =>
-                {
-                    _baseColorScheme = sc.Value;
-                    SetColorScheme();
-                    foreach (var menuItem in menuItems)
-                    {
-                        menuItem.Checked = menuItem.Title.Equals(sc.Key) && sc.Value == _baseColorScheme;
-                    }
-                };
-                menuItems.Add(item);
-            }
-            return menuItems.ToArray();
-        }
 
         private static void _scenarioListView_OpenSelectedItem(EventArgs e)
         {
@@ -443,34 +345,6 @@ namespace SmartThingsTerminal
             }
             _scenarioListView.Source = new ScenarioListDataSource(newlist);
             _scenarioListView.SelectedItem = 0;
-        }
-
-        private static string GetAppTitle(bool useNewLine = false)
-        {
-            if (useNewLine)
-            {
-                StringBuilder appName = new StringBuilder();
-                appName.Append("      _______.___________.___________.  \n");
-                appName.Append("     /       |           |           |  \n");
-                appName.Append("    |   (----`---|  |----`---|  |----`  \n");
-                appName.Append("     \\   \\       |  |        |  |       \n");
-                appName.Append(" .----)   |mart  |  |hings   |  |erminal\n");
-                appName.Append(" |_______/       |__|        |__|       \n");
-                appName.Append($" Interactive CLI for SmartThings v{typeof(Program).Assembly.GetName().Version}");
-                return appName.ToString();
-            }
-            else
-            {
-                StringBuilder appName = new StringBuilder();
-                appName.AppendLine(@"      _______.___________.___________.  ");
-                appName.AppendLine(@"     /       |           |           |  ");
-                appName.AppendLine(@"    |   (----`---|  |----`---|  |----`  ");
-                appName.AppendLine(@"     \   \       |  |        |  |       ");
-                appName.AppendLine(@" .----)   |mart  |  |hings   |  |erminal");
-                appName.AppendLine(@" |_______/       |__|        |__|       ");
-                appName.AppendLine($" Interactive CLI for SmartThings v{typeof(Program).Assembly.GetName().Version}");
-                return appName.ToString();
-            }
         }
     }
 }
