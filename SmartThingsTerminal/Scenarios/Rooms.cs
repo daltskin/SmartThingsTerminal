@@ -2,6 +2,7 @@
 using SmartThingsNet.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Terminal.Gui;
 
@@ -105,6 +106,49 @@ namespace SmartThingsTerminal.Scenarios
                 {
                     ShowErrorMessage($"Error {exp.Message}");
                 }
+            }
+        }
+
+        public override void GetDirectoriesAndFileView(string currentDirectory)
+        {
+            var files = Directory.GetFiles(currentDirectory, "*.json").Select(t => t.Substring(t.LastIndexOf(@"\") + 1));
+
+            var directoryList = new ListView(files.ToList());
+            directoryList.Width = Dim.Fill();
+            directoryList.Height = Dim.Fill();
+
+            directoryList.OpenSelectedItem += (args) =>
+            {
+                string selectedDirectory = ((ListViewItemEventArgs)args).Value.ToString();
+                ImportRoom($"{currentDirectory}//{selectedDirectory}");
+            };
+
+            FilePicker.Add(directoryList);
+            FilePicker.SetFocus(directoryList);
+        }
+
+        private void ImportRoom(string filePath)
+        {
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                var room = JsonConvert.DeserializeObject<Room>(json);
+                
+                var roomRequest = new CreateRoomRequest(room.Name);
+                STClient.CreateRoom(room.LocationId.ToString(), roomRequest);
+                ShowMessage($"Room added!");
+            }
+            catch (SmartThingsNet.Client.ApiException exp)
+            {
+                ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
+            }
+            catch (Exception exp)
+            {
+                ShowErrorMessage($"Error {exp.Message}");
+            }
+            finally
+            {
+                ImportItem();
             }
         }
     }

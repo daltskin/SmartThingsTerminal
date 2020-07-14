@@ -134,7 +134,7 @@ namespace SmartThingsTerminal
             _categoryListView.SelectedItemChanged += CategoryListView_SelectedChanged;
             _leftPane.Add(_categoryListView);
 
-            Label appNameView = new Label() { X = 0, Y = 0, Height = Dim.Fill(), Width = Dim.Fill(), CanFocus = false, Text = MenuHelper.GetAppTitle(true) };
+            Label appNameView = new Label() { X = 0, Y = 0, Height = Dim.Fill(), Width = Dim.Fill(), CanFocus = false, Text = MenuHelper.GetAppTitle() };
             _appTitlePane = new FrameView()
             {
                 X = 25,

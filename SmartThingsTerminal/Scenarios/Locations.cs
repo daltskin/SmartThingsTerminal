@@ -2,6 +2,7 @@
 using SmartThingsNet.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Terminal.Gui;
 
@@ -88,11 +89,11 @@ namespace SmartThingsTerminal.Scenarios
                             regionRadius: location.RegionRadius,
                             temperatureScale: location.TemperatureScale,
                             locale: location.Locale,
-                            additionalProperties: location.AdditionalProperties); 
-                        
+                            additionalProperties: location.AdditionalProperties);
+
                         STClient.UpdateLocation(location.LocationId.ToString(), locationRequest);
                     }
-                    
+
                     RefreshScreen();
                 }
                 catch (SmartThingsNet.Client.ApiException exp)
@@ -122,6 +123,58 @@ namespace SmartThingsTerminal.Scenarios
                 {
                     ShowErrorMessage($"Error deleting: {exp.Message}");
                 }
+            }
+        }
+
+        public override void GetDirectoriesAndFileView(string currentDirectory)
+        {
+            var files = Directory.GetFiles(currentDirectory, "*.json").Select(t => t.Substring(t.LastIndexOf(@"\") + 1));
+
+            var directoryList = new ListView(files.ToList());
+            directoryList.Width = Dim.Fill();
+            directoryList.Height = Dim.Fill();
+
+            directoryList.OpenSelectedItem += (args) =>
+            {
+                string selectedDirectory = ((ListViewItemEventArgs)args).Value.ToString();
+                ImportLocation($"{currentDirectory}//{selectedDirectory}");
+            };
+
+            FilePicker.Add(directoryList);
+            FilePicker.SetFocus(directoryList);
+        }
+
+        private void ImportLocation(string filePath)
+        {
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                var location = JsonConvert.DeserializeObject<Location>(json);
+
+                var createLocationRequest = new CreateLocationRequest(
+                    name: location.Name,
+                    countryCode: location.CountryCode ?? "USA",
+                    latitude: location.Latitude,
+                    longitude: location.Longitude,
+                    regionRadius: location.RegionRadius,
+                    temperatureScale: location.TemperatureScale,
+                    locale: location.Locale,
+                    additionalProperties: location.AdditionalProperties);
+
+                STClient.CreateLocation(createLocationRequest);
+                ShowMessage($"Location added!");
+            }
+            catch (SmartThingsNet.Client.ApiException exp)
+            {
+                ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
+            }
+            catch (Exception exp)
+            {
+                ShowErrorMessage($"Error {exp.Message}");
+            }
+            finally
+            {
+                ImportItem();
             }
         }
     }

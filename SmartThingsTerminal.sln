@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{0A86A10D-D
 		docs\pat.png = docs\pat.png
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "Terminal.Gui\Terminal.Gui.csproj", "{5D2D5581-505E-4CD8-8A68-D34C5D5C4201}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "Terminal.Gui\Terminal.Gui.csproj", "{6081AFEE-CDD5-46E0-9FC4-81117AFCC776}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,10 +34,10 @@ Global
 		{9DF95721-8429-48A4-BFA7-8F1C006E8322}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DF95721-8429-48A4-BFA7-8F1C006E8322}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DF95721-8429-48A4-BFA7-8F1C006E8322}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5D2D5581-505E-4CD8-8A68-D34C5D5C4201}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5D2D5581-505E-4CD8-8A68-D34C5D5C4201}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5D2D5581-505E-4CD8-8A68-D34C5D5C4201}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5D2D5581-505E-4CD8-8A68-D34C5D5C4201}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6081AFEE-CDD5-46E0-9FC4-81117AFCC776}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6081AFEE-CDD5-46E0-9FC4-81117AFCC776}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6081AFEE-CDD5-46E0-9FC4-81117AFCC776}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6081AFEE-CDD5-46E0-9FC4-81117AFCC776}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
