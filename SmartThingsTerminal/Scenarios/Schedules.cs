@@ -2,6 +2,7 @@
 using SmartThingsNet.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Terminal.Gui;
 
@@ -38,7 +39,7 @@ namespace SmartThingsTerminal.Scenarios
             {
                 ShowErrorMessage($"Error {exp.Message}");
             }
-            ConfigureWindows<Scenario>(displayItemList, dataItemList);
+            ConfigureWindows<Schedule>(displayItemList, dataItemList);
         }
 
         public override void ConfigureStatusBar()
@@ -99,6 +100,50 @@ namespace SmartThingsTerminal.Scenarios
                 {
                     ShowErrorMessage($"Error {exp.Message}");
                 }
+            }
+        }
+
+        public override void GetDirectoriesAndFileView(string currentDirectory)
+        {
+            var files = Directory.GetFiles(currentDirectory, "*.json").Select(t => t.Substring(t.LastIndexOf(@"\") + 1));
+
+            var directoryList = new ListView(files.ToList());
+            directoryList.Width = Dim.Fill();
+            directoryList.Height = Dim.Fill();
+
+            directoryList.OpenSelectedItem += (args) =>
+            {
+                string selectedDirectory = ((ListViewItemEventArgs)args).Value.ToString();
+                ImportSchedule($"{currentDirectory}//{selectedDirectory}");
+            };
+
+            FilePicker.Add(directoryList);
+            FilePicker.SetFocus(directoryList);
+        }
+
+        private void ImportSchedule(string filePath)
+        {
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                var schedule = JsonConvert.DeserializeObject<Schedule>(json);
+                var scheduleRequest = new ScheduleRequest(
+                    cron: schedule.Cron,
+                    name: schedule.Name);
+                STClient.CreateSchedule(schedule.InstalledAppId.ToString(), scheduleRequest);
+                ShowMessage($"Schedule added!");
+            }
+            catch (SmartThingsNet.Client.ApiException exp)
+            {
+                ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
+            }
+            catch (Exception exp)
+            {
+                ShowErrorMessage($"Error {exp.Message}");
+            }
+            finally
+            {
+                ImportItem();
             }
         }
     }

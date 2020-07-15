@@ -13,6 +13,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using NStack;
@@ -110,7 +111,7 @@ namespace Terminal.Gui {
 	///    frames for the vies that use <see cref="LayoutStyle.Computed"/>.
 	/// </para>
 	/// </remarks>
-	public partial class View : Responder, IEnumerable {
+	public partial class View : Responder, IEnumerable, ISupportInitializeNotification {
 
 		internal enum Direction {
 			Forward,
@@ -123,7 +124,6 @@ namespace Terminal.Gui {
 		Direction focusDirection;
 
 		TextFormatter textFormatter;
-		bool wordWrapText;
 
 		/// <summary>
 		/// Event fired when a subview is being added to this view.
@@ -164,11 +164,6 @@ namespace Terminal.Gui {
 		/// Gets or sets the HotKey defined for this view. A user pressing HotKey on the keyboard while this view has focus will cause the Clicked event to fire.
 		/// </summary>
 		public Key HotKey { get => textFormatter.HotKey; set => textFormatter.HotKey = value; }
-
-		/// <summary>
-		/// Word wrap text boolean
-		/// </summary>
-		public bool WordWrapText { get => textFormatter.WordWrapText; set => textFormatter.WordWrapText = value; }
 
 		/// <summary>
 		/// Gets or sets the specifier character for the hotkey (e.g. '_'). Set to '\xffff' to disable hotkey support for this View instance. The default is '\xffff'. 
@@ -671,9 +666,11 @@ namespace Terminal.Gui {
 				CanFocus = true;
 				view.tabIndex = tabIndexes.IndexOf (view);
 			}
-
 			SetNeedsLayout ();
 			SetNeedsDisplay ();
+			if (IsInitialized) {
+				view.BeginInit ();
+			}
 		}
 
 		/// <summary>
@@ -1008,7 +1005,7 @@ namespace Terminal.Gui {
 				focused.PositionCursor ();
 			else {
 				if (CanFocus && HasFocus) {
-					Move (textFormatter.HotKeyPos == -1 ? 1 : textFormatter.HotKeyPos, 0);
+					Move (textFormatter.HotKeyPos == -1 ? 0 : textFormatter.HotKeyPos, 0);
 				} else {
 					Move (frame.X, frame.Y);
 				}
@@ -1363,13 +1360,12 @@ namespace Terminal.Gui {
 		{
 			KeyEventEventArgs args = new KeyEventEventArgs (keyEvent);
 			KeyDown?.Invoke (args);
-			if (args.Handled)
+			if (args.Handled) {
 				return true;
-			if (subviews == null || subviews.Count == 0)
-				return false;
-			foreach (var view in subviews)
-				if (view.HasFocus && view.OnKeyDown (keyEvent))
-					return true;
+			}
+			if (Focused?.OnKeyDown (keyEvent) == true) {
+				return true;
+			}
 
 			return false;
 		}
@@ -1384,13 +1380,12 @@ namespace Terminal.Gui {
 		{
 			KeyEventEventArgs args = new KeyEventEventArgs (keyEvent);
 			KeyUp?.Invoke (args);
-			if (args.Handled)
+			if (args.Handled) {
 				return true;
-			if (subviews == null || subviews.Count == 0)
-				return false;
-			foreach (var view in subviews)
-				if (view.HasFocus && view.OnKeyUp (keyEvent))
-					return true;
+			}
+			if (Focused?.OnKeyUp (keyEvent) == true) {
+				return true;
+			}
 
 			return false;
 		}
@@ -1660,6 +1655,13 @@ namespace Terminal.Gui {
 		public Action<LayoutEventArgs> LayoutComplete;
 
 		/// <summary>
+		/// Event called only once when the <see cref="View"/> is being initialized for the first time.
+		/// Allows configurations and assignments to be performed before the <see cref="View"/> being shown.
+		/// This derived from <see cref="ISupportInitializeNotification"/> to allow notify all the views that are being initialized.
+		/// </summary>
+		public event EventHandler Initialized;
+
+		/// <summary>
 		/// Raises the <see cref="LayoutComplete"/> event. Called from  <see cref="LayoutSubviews"/> before all sub-views have been laid out.
 		/// </summary>
 		internal virtual void OnLayoutComplete (LayoutEventArgs args)
@@ -1764,6 +1766,12 @@ namespace Terminal.Gui {
 		}
 
 		/// <summary>
+		/// Get or sets if  the <see cref="View"/> was already initialized.
+		/// This derived from <see cref="ISupportInitializeNotification"/> to allow notify all the views that are being initialized.
+		/// </summary>
+		public bool IsInitialized { get; set; }
+
+		/// <summary>
 		/// Pretty prints the View
 		/// </summary>
 		/// <returns></returns>
@@ -1853,6 +1861,38 @@ namespace Terminal.Gui {
 				subview.Dispose ();
 			}
 			base.Dispose (disposing);
+		}
+
+		/// <summary>
+		/// This derived from <see cref="ISupportInitializeNotification"/> to allow notify all the views that are beginning initialized.
+		/// </summary>
+		public void BeginInit ()
+		{
+			if (!IsInitialized) {
+				Initialized?.Invoke (this, new EventArgs ());
+			}
+			if (subviews?.Count > 0) {
+				foreach (var view in subviews) {
+					if (!view.IsInitialized) {
+						view.BeginInit ();
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// This derived from <see cref="ISupportInitializeNotification"/> to allow notify all the views that are ending initialized.
+		/// </summary>
+		public void EndInit ()
+		{
+			IsInitialized = true;
+			if (subviews?.Count > 0) {
+				foreach (var view in subviews) {
+					if (!view.IsInitialized) {
+						view.EndInit ();
+					}
+				}
+			}
 		}
 	}
 }

@@ -444,7 +444,7 @@ namespace Terminal.Gui {
 				Y = 0,
 			};
 			Add (this.message);
-			var msgLines = TextFormatter.MaxLines (message, Driver.Cols - 20, WordWrapText);
+			var msgLines = TextFormatter.MaxLines (message, Driver.Cols - 20);
 
 			dirLabel = new Label ("Directory: ") {
 				X = 1,

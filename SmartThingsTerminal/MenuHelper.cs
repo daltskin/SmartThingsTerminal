@@ -11,7 +11,7 @@ namespace SmartThingsTerminal
         {
             StringBuilder aboutMessage = new StringBuilder();
             aboutMessage.Append("\n");
-            aboutMessage.Append(GetAppTitle(true));
+            aboutMessage.Append(GetAppTitle());
             aboutMessage.Append("\n");
             aboutMessage.Append("SmartThings Terminal\n");
             aboutMessage.Append("Terminal for the SmartThings REST API\n");
@@ -23,14 +23,22 @@ namespace SmartThingsTerminal
             return aboutMessage.ToString();
         }
 
-        public static MenuBar GetStandardMenuBar(ColorScheme colorScheme, Action exportAction = null)
+        public static MenuBar GetStandardMenuBar(ColorScheme colorScheme, string typeName = null, Action exportAction = null, Action importAction = null)
         {
             List<MenuItem> fileSubMenu = new List<MenuItem>();
+            if (importAction != null)
+            {
+                fileSubMenu.Add(new MenuItem($"_Import {typeName}", "", () => importAction()));
+            }
             if (exportAction != null)
             {
-                fileSubMenu.Add(new MenuItem("_Export", "", () => exportAction()));
+                fileSubMenu.Add(new MenuItem($"_Export {typeName}", "", () => exportAction()));
             }
-            fileSubMenu.Add(new MenuItem("_Quit", "", () => Application.RequestStop()));
+
+            if (typeName == null)
+            {
+                fileSubMenu.Add(new MenuItem("_Quit", "", () => Application.RequestStop()));
+            }
             var fileMenuBar = new MenuBarItem("_File", fileSubMenu.ToArray());
 
             var colorSchemeBar = new MenuBarItem("_Color Scheme", CreateColorSchemeMenuItems(colorScheme));
@@ -84,32 +92,17 @@ namespace SmartThingsTerminal
             }
         }
 
-        public static string GetAppTitle(bool useNewLine = false)
+        public static string GetAppTitle()
         {
-            if (useNewLine)
-            {
-                StringBuilder appName = new StringBuilder();
-                appName.Append("      _______.___________.___________.  \n");
-                appName.Append("     /       |           |           |  \n");
-                appName.Append("    |   (----`---|  |----`---|  |----`  \n");
-                appName.Append("     \\   \\       |  |        |  |       \n");
-                appName.Append(" .----)   |mart  |  |hings   |  |erminal\n");
-                appName.Append(" |_______/       |__|        |__|       \n");
-                appName.Append($" Interactive CLI for SmartThings v{typeof(Program).Assembly.GetName().Version}");
-                return appName.ToString();
-            }
-            else
-            {
-                StringBuilder appName = new StringBuilder();
-                appName.AppendLine(@"      _______.___________.___________.  ");
-                appName.AppendLine(@"     /       |           |           |  ");
-                appName.AppendLine(@"    |   (----`---|  |----`---|  |----`  ");
-                appName.AppendLine(@"     \   \       |  |        |  |       ");
-                appName.AppendLine(@" .----)   |mart  |  |hings   |  |erminal");
-                appName.AppendLine(@" |_______/       |__|        |__|       ");
-                appName.AppendLine($" Interactive CLI for SmartThings v{typeof(Program).Assembly.GetName().Version}");
-                return appName.ToString();
-            }
+            StringBuilder appName = new StringBuilder();
+            appName.AppendLine(@"      _______.___________.___________.  ");
+            appName.AppendLine(@"     /       |           |           |  ");
+            appName.AppendLine(@"    |   (----`---|  |----`---|  |----`  ");
+            appName.AppendLine(@"     \   \       |  |        |  |       ");
+            appName.AppendLine(@" .----)   |mart  |  |hings   |  |erminal");
+            appName.AppendLine(@" |_______/       |__|        |__|       ");
+            appName.AppendLine($" Interactive CLI for SmartThings v{typeof(Program).Assembly.GetName().Version}");
+            return appName.ToString();
         }
     }
 }

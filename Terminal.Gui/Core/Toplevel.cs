@@ -122,6 +122,42 @@ namespace Terminal.Gui {
 		public StatusBar StatusBar { get; set; }
 
 		///<inheritdoc/>
+		public override bool OnKeyDown (KeyEvent keyEvent)
+		{
+			if (base.OnKeyDown (keyEvent)) {
+				return true;
+			}
+
+			switch (keyEvent.Key) {
+			case Key.AltMask:
+				if (MenuBar != null && MenuBar.OnKeyDown (keyEvent)) {
+					return true;
+				}
+				break;
+			}
+
+			return false;
+		}
+
+		///<inheritdoc/>
+		public override bool OnKeyUp (KeyEvent keyEvent)
+		{
+			if (base.OnKeyUp (keyEvent)) {
+				return true;
+			}
+
+			switch (keyEvent.Key) {
+			case Key.AltMask:
+				if (MenuBar != null && MenuBar.OnKeyUp (keyEvent)) {
+					return true;
+				}
+				break;
+			}
+
+			return false;
+		}
+
+		///<inheritdoc/>
 		public override bool ProcessKey (KeyEvent keyEvent)
 		{
 			if (base.ProcessKey (keyEvent))
@@ -228,13 +264,13 @@ namespace Terminal.Gui {
 		///<inheritdoc/>
 		public override void Remove (View view)
 		{
-			if (this == Application.Top) {
+			if (this is Toplevel && ((Toplevel)this).MenuBar != null) {
 				if (view is MenuBar) {
 					MenuBar?.Dispose ();
 					MenuBar = null;
 				}
 				if (view is StatusBar) {
-					StatusBar = null;
+					StatusBar?.Dispose ();
 					StatusBar = null;
 				}
 			}
@@ -286,6 +322,7 @@ namespace Terminal.Gui {
 
 		internal void PositionToplevels ()
 		{
+			PositionToplevel (this);
 			foreach (var top in Subviews) {
 				if (top is Toplevel) {
 					PositionToplevel ((Toplevel)top);
@@ -296,17 +333,21 @@ namespace Terminal.Gui {
 		private void PositionToplevel (Toplevel top)
 		{
 			EnsureVisibleBounds (top, top.Frame.X, top.Frame.Y, out int nx, out int ny);
-			if ((nx != top.Frame.X || ny != top.Frame.Y) && top.LayoutStyle != LayoutStyle.Computed) {
-				top.X = nx;
-				top.Y = ny;
+			if ((nx != top.Frame.X || ny != top.Frame.Y) && top.LayoutStyle == LayoutStyle.Computed) {
+				if (top.X is Pos.PosAbsolute && top.Bounds.X != nx) {
+					top.X = nx;
+				}
+				if (top.Y is Pos.PosAbsolute && top.Bounds.Y != ny) {
+					top.Y = ny;
+				}
 			}
 			if (StatusBar != null) {
-				if (ny + top.Frame.Height > Driver.Rows - 1) {
+				if (ny + top.Frame.Height > top.Frame.Height - 1) {
 					if (top.Height is Dim.DimFill)
 						top.Height = Dim.Fill () - 1;
 				}
-				if (StatusBar.Frame.Y != Driver.Rows - 1) {
-					StatusBar.Y = Driver.Rows - 1;
+				if (StatusBar.Frame.Y != Frame.Height - 1) {
+					StatusBar.Y = Frame.Height - 1;
 					SetNeedsDisplay ();
 				}
 			}

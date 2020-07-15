@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using NStack;
+using SmartThingsNet.Model;
+using SmartThingsTerminal.Scenarios;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,12 +23,16 @@ namespace SmartThingsTerminal
         public Window LeftPane { get; set; }
         public ListView ClassListView { get; set; }
 
+        public ListView FileList { get; set; }
+
         public dynamic SelectedItem { get; set; }
 
         public int SelectedItemIndex { get; set; }
         public FrameView HostPane { get; set; }
 
         public FrameView SettingsPane { get; set; }
+
+        public FrameView FilePicker { get; set; }
 
         public Label ErrorView { get; set; }
 
@@ -231,7 +237,49 @@ namespace SmartThingsTerminal
                 ShowMessage($"Exported: {SelectedItem.GetType().Name}_{id}.json");
             }
         }
-        
+
+        public virtual void ImportItem()
+        {
+            if (FilePicker != null)
+            {
+                FilePicker.RemoveAll();
+                LeftPane.Remove(FilePicker);
+                FilePicker = null;
+                RefreshScreen();
+            }
+            else
+            {
+                ShowImportFileMenu();
+            }
+        }
+
+        public virtual void ShowImportFileMenu()
+        {
+            FilePicker = new FrameView("Select file")
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Percent(75),
+                ColorScheme = Colors.Menu
+            };
+
+            FilePicker.Leave += (args) =>
+            {
+                LeftPane.Remove(FilePicker);
+                FilePicker = null;
+            };
+
+            GetDirectoriesAndFileView(Directory.GetCurrentDirectory());
+            LeftPane.Add(FilePicker);
+            LeftPane.SetFocus(FilePicker);
+        }
+
+        public virtual void GetDirectoriesAndFileView(string currentDirectory)
+        {
+
+        }
+
         Dictionary<string, dynamic> _dataItemList = null;
 
         public virtual void ConfigureWindows<T>(
@@ -253,23 +301,41 @@ namespace SmartThingsTerminal
 
             ConfigureStatusBar();
 
+            MenuBar menubar = null;
             if (displayItemList?.Count > 0)
             {
                 var itemListView = GetClassListView<T>(displayItemList);
                 LeftPane.Add(itemListView);
-            }
 
-            var _menu = MenuHelper.GetStandardMenuBar(Top.ColorScheme, ExportItem);
-
-            if (SettingsPane == null)
-            {
-                Top.Add(_menu, LeftPane, HostPane);
+                string typeName = dataItemList.FirstOrDefault().Value.GetType().Name;
+                switch ((T)dataItemList.FirstOrDefault().Value)
+                {
+                    case Device d:
+                    case InstalledApp app:
+                    case SceneSummary s:
+                    case Subscription sub:
+                        menubar = MenuHelper.GetStandardMenuBar(Top.ColorScheme, typeName, ExportItem, null);
+                        break;
+                    default:
+                        menubar = MenuHelper.GetStandardMenuBar(Top.ColorScheme, typeName, ExportItem, ImportItem);
+                        break;
+                }
             }
             else
             {
-                Top.Add(_menu, LeftPane, SettingsPane, HostPane);
+                menubar = MenuHelper.GetStandardMenuBar(Top.ColorScheme);
             }
-
+            
+            if (menubar != null)
+            {
+                Top.Add(menubar);
+            }
+            Top.Add(LeftPane);
+            if (SettingsPane != null)
+            {
+                Top.Add(SettingsPane);
+            }
+            Top.Add(HostPane);
             Top.Add(StatusBar);
 
             if (displayItemList?.Count > 0)
