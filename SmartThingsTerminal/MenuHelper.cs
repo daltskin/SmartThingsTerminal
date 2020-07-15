@@ -35,11 +35,7 @@ namespace SmartThingsTerminal
                 fileSubMenu.Add(new MenuItem($"_Export {typeName}", "", () => exportAction()));
             }
 
-            if (typeName != null)
-            {
-                fileSubMenu.Add(new MenuItem("_Main Menu", "", () => Application.RequestStop()));
-            }
-            else
+            if (typeName == null)
             {
                 fileSubMenu.Add(new MenuItem("_Quit", "", () => Application.RequestStop()));
             }
