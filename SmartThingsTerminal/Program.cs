@@ -210,7 +210,7 @@ namespace SmartThingsTerminal
                 }
             };
 
-            Application.Run(_top, true);
+            Application.Run(_top);
             Application.Shutdown();
             return _runningScenario;
         }
