@@ -122,7 +122,7 @@ namespace SmartThingsTerminal
             {
                 X = 0,
                 Y = 1,
-                Width = 40,
+                Width = Dim.Percent(25),
                 Height = Dim.Fill(),
                 CanFocus = false,
                 ColorScheme = Colors.TopLevel,
