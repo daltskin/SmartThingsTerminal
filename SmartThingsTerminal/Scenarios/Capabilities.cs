@@ -13,7 +13,6 @@ namespace SmartThingsTerminal.Scenarios
     [ScenarioCategory("Capabilities")]
     class Capabilities : Scenario
     {
-        private FrameView _capabilitySummaryFrame;
         private TextView _capabilityPresentationJsonView;
         private ListView _componentList;
         private FrameView _componentFrame;
@@ -190,6 +189,7 @@ namespace SmartThingsTerminal.Scenarios
             StatusBar = new StatusBar(new StatusItem[] {
                 new StatusItem(Key.F1, "~F1~ Capability Details", () => ToggleCapability()),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
+                new StatusItem(Key.F9, "~F9~ Menu", () => { }),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
             });
         }

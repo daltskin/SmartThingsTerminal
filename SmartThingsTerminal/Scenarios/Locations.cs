@@ -40,7 +40,7 @@ namespace SmartThingsTerminal.Scenarios
                 ShowErrorMessage($"Unknown error calling API: {exp.Message}");
             }
 
-            ConfigureWindows<Location>(displayItemList, dataItemList);
+            ConfigureWindows<PagedLocation>(displayItemList, dataItemList);
         }
 
 
@@ -51,7 +51,8 @@ namespace SmartThingsTerminal.Scenarios
                 new StatusItem(Key.F4, "~F4~ Save", () => SaveItem(false)),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.F6, "~F6~ Copy Location", () => SaveItem(true)),
-                new StatusItem(Key.F9, "~F9~ Delete Location", () => DeleteItem()),
+                new StatusItem(Key.F7, "~F7~ Delete Location", () => DeleteItem()),
+                new StatusItem(Key.F9, "~F9~ Menu", () => { }),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
             });
         }
@@ -112,7 +113,7 @@ namespace SmartThingsTerminal.Scenarios
         {
             if (SelectedItem != null)
             {
-                Location currentItem = (Location)SelectedItem;
+                PagedLocation currentItem = (PagedLocation)SelectedItem;
                 try
                 {
                     STClient.DeleteLocation(currentItem.LocationId.ToString());
