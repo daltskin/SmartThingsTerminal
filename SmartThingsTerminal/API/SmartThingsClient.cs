@@ -301,6 +301,11 @@ namespace SmartThingsTerminal
             return _capabilitiesApi.GetCapability(capabilityId, capabilityVersion);
         }
 
+        public Capability CreateCapability(CreateCapabilityRequest capabilityRequest)
+        {
+            return _capabilitiesApi.CreateCapability(capabilityRequest);
+        }
+
         public Capability UpdateCapability(string capabilityId, int capabilityVersion, UpdateCapabilityRequest updateCapabilityRequest)
         {
             return _capabilitiesApi.UpdateCapability(capabilityId, capabilityVersion, updateCapabilityRequest);

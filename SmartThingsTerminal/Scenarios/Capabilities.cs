@@ -1,6 +1,8 @@
-﻿using SmartThingsNet.Model;
+﻿using Newtonsoft.Json;
+using SmartThingsNet.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Terminal.Gui;
 using TextField = Terminal.Gui.TextField;
@@ -73,24 +75,15 @@ namespace SmartThingsTerminal.Scenarios
 
         public override void ConfigureSettingsPane()
         {
-            SettingsPane = new FrameView("Settings")
+            SettingsPane = new FrameView("Capability Summary")
             {
                 X = Pos.Right(LeftPane),
                 Y = 1, // for menu
                 Width = Dim.Fill(),
-                Height = 8,
+                Height = 5,
                 CanFocus = false,
                 ColorScheme = Colors.TopLevel,
             };
-
-            _capabilitySummaryFrame = new FrameView("Capability Details")
-            {
-                X = 0,
-                Y = 0,
-                Height = 6,
-                Width = Dim.Fill(),
-            };
-            SettingsPane.Add(_capabilitySummaryFrame);
             ConfigureHostPane("");
         }
 
@@ -98,25 +91,68 @@ namespace SmartThingsTerminal.Scenarios
         {
             CapabilitySummary capability = (CapabilitySummary)selectedItem;
 
-            _capabilitySummaryFrame.RemoveAll();
+            SettingsPane.RemoveAll();
 
             var labelId = new Label("Id:") { X = 0, Y = 0 };
-            _capabilitySummaryFrame.Add(labelId);
+            SettingsPane.Add(labelId);
             var deviceId = new TextField($"{capability.Id}") { X = Pos.Right(labelId) + 1, Y = 0, Width = 40 };
             deviceId.ColorScheme = Colors.Base;
-            _capabilitySummaryFrame.Add(deviceId);
+            SettingsPane.Add(deviceId);
 
             var labelDeviceLabel = new Label("Status:") { X = 0, Y = 1 };
-            _capabilitySummaryFrame.Add(labelDeviceLabel);
+            SettingsPane.Add(labelDeviceLabel);
             var deviceLabel = new TextField($"{capability?.Status}") { X = Pos.Right(labelDeviceLabel) + 1, Y = 1, Width = 40 };
             deviceLabel.ColorScheme = Colors.Base;
-            _capabilitySummaryFrame.Add(deviceLabel);
+            SettingsPane.Add(deviceLabel);
 
             var labelType = new Label("Version:") { X = 0, Y = 2 };
-            _capabilitySummaryFrame.Add(labelType);
+            SettingsPane.Add(labelType);
             var deviceType = new TextField($"{capability.Version}") { X = Pos.Right(labelType) + 1, Y = 2, Width = 40 };
             deviceType.ColorScheme = Colors.Base;
-            _capabilitySummaryFrame.Add(deviceType);
+            SettingsPane.Add(deviceType);
+        }
+
+        public override void GetDirectoriesAndFileView(string currentDirectory)
+        {
+            var files = Directory.GetFiles(currentDirectory, "*.json").Select(t => t.Substring(t.LastIndexOf(@"\") + 1));
+
+            var directoryList = new ListView(files.ToList());
+            directoryList.Width = Dim.Fill();
+            directoryList.Height = Dim.Fill();
+
+            directoryList.OpenSelectedItem += (args) =>
+            {
+                string selectedDirectory = ((ListViewItemEventArgs)args).Value.ToString();
+                ImportCapability($"{currentDirectory}//{selectedDirectory}");
+            };
+
+            FilePicker.Add(directoryList);
+            FilePicker.SetFocus(directoryList);
+        }
+
+        private void ImportCapability(string filePath)
+        {
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                var capability = JsonConvert.DeserializeObject<Capability>(json);
+
+                var capabilityRequest = new CreateCapabilityRequest(capability.Id, capability.Attributes, capability.Commands);
+                STClient.CreateCapability(capabilityRequest);
+                ShowMessage($"Capability added!");
+            }
+            catch (SmartThingsNet.Client.ApiException exp)
+            {
+                ShowErrorMessage($"Error {exp.ErrorCode}{Environment.NewLine}{exp.Message}");
+            }
+            catch (Exception exp)
+            {
+                ShowErrorMessage($"Error {exp.Message}");
+            }
+            finally
+            {
+                ImportItem();
+            }
         }
 
         private void ConfigureCapabilityPane(CapabilitySummary selectedCapability)
@@ -127,7 +163,7 @@ namespace SmartThingsTerminal.Scenarios
                 Y = 0,
                 Height = Dim.Fill(),
                 Width = Dim.Fill(),
-                Title = $"Capability Presentation",
+                Title = $"Capability Details",
                 ColorScheme = Colors.TopLevel
             };
 
@@ -152,7 +188,7 @@ namespace SmartThingsTerminal.Scenarios
         public override void ConfigureStatusBar()
         {
             StatusBar = new StatusBar(new StatusItem[] {
-                new StatusItem(Key.F1, "~F1~ Capability Presentation", () => ToggleCapability()),
+                new StatusItem(Key.F1, "~F1~ Capability Details", () => ToggleCapability()),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
             });

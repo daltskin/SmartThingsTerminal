@@ -314,6 +314,7 @@ namespace SmartThingsTerminal
                     case InstalledApp app:
                     case SceneSummary s:
                     case Subscription sub:
+                    case CapabilitySummary cs:
                         menubar = MenuHelper.GetStandardMenuBar(Top.ColorScheme, typeName, ExportItem, null);
                         break;
                     default:
@@ -521,7 +522,7 @@ namespace SmartThingsTerminal
         public virtual void Run()
         {
             // This method already performs a later automatic shutdown.
-            Application.Run(Top);
+            Application.Run(Top, false);
         }
 
         /// <summary>
