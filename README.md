@@ -39,7 +39,8 @@ Hotkeys are dependant on the selected screen:
 * F4 Save
 * F5 Refresh - refresh data at any point
 * F6 Copy
-* F9 Delete (use with caution**)
+* F7 Delete (use with caution**)
+* F9 Menu
 * Home - Back to menu screen
 * CTRL-Q - Quit
 
