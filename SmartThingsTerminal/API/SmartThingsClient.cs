@@ -172,7 +172,25 @@ namespace SmartThingsTerminal
         {
             if (_allLocations == null)
             {
-                _allLocations = _locationsApi.ListLocations();
+                var listLocations = _locationsApi.ListLocations();
+                if (listLocations != null)
+                {
+                    _allLocations = new PagedLocations();
+                    _allLocations.Items = new List<Location>();
+                    foreach (var location in listLocations.Items)
+                    {
+                        var locationDetails = _locationsApi.GetLocation(location.LocationId.ToString());
+                        // location specifics might come back null - if so, use the details we have from the listlocations
+                        if (locationDetails != null)
+                        {
+                            _allLocations.Items.Add(locationDetails);
+                        }
+                        else 
+                        {
+                            _allLocations.Items.Add(location);
+                        }
+                    }
+                }
             }
             return _allLocations;
         }
