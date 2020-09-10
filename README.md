@@ -17,6 +17,7 @@ This CLI tool has the following features:
 
 | Screen | View | Import | Export | Run commands | Edit | Save | Copy | Delete |
 | ----- |:-----:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
+| Capabilities | * | n/a | * | n/a | n/a | n/a | n/a | n/a | 
 | Devices | * | n/a | * | * | n/a | n/a | n/a | n/a | 
 | Locations | * | n/a | * | n/a | n/a | * | * | * | 
 | Rooms | * | n/a | * | n/a | n/a | * | * | * | 
@@ -33,13 +34,13 @@ This CLI tool has the following features:
 Hotkeys are dependant on the selected screen:
 
 * F1 Device component status
-* F2 Import
 * F4 Toggle device switch on/off
 * F3 Edit
 * F4 Save
 * F5 Refresh - refresh data at any point
 * F6 Copy
-* F9 Delete (use with caution**)
+* F7 Delete (use with caution**)
+* F9 Menu
 * Home - Back to menu screen
 * CTRL-Q - Quit
 
@@ -74,6 +75,10 @@ $ ./STT -t {accesstoken} -s devices
 
 ## Full feature list
 
+* View Capability Summaries
+  * View all of the capability summaries
+  * View capability details
+  * Export capability summary to a json file
 * View Devices
   * View all of the registered devices
   * View device components status

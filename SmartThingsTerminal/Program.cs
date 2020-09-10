@@ -181,6 +181,9 @@ namespace SmartThingsTerminal
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => {
                     _stClient.ResetData();
                 }),
+                new StatusItem(Key.F9, "~F9~ Menu", () => {
+                    _stClient.ResetData();
+                }),
                 new StatusItem(Key.ControlQ, "~CTRL-Q~ Quit", () => {
                     if (_runningScenario is null){
 						// This causes GetScenarioToRun to return null
@@ -210,7 +213,7 @@ namespace SmartThingsTerminal
                 }
             };
 
-            Application.Run(_top, true);
+            Application.Run(_top);
             Application.Shutdown();
             return _runningScenario;
         }

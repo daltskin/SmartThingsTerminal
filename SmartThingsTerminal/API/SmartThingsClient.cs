@@ -3,6 +3,7 @@ using SmartThingsNet.Client;
 using SmartThingsNet.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SmartThingsTerminal
@@ -21,6 +22,7 @@ namespace SmartThingsTerminal
         private PagedSubscriptions _allSubscriptions;
         private PagedInstalledApps _allInstalledApps;
         private PagedDeviceProfiles _allDeviceProfiles;
+        private PagedCapabilities _allCapabilities;
 
         private DevicesApi _devicesApi;
         private LocationsApi _locationsApi;
@@ -32,12 +34,13 @@ namespace SmartThingsTerminal
         private SubscriptionsApi _subscriptionsApi;
         private InstalledAppsApi _installedAppsApi;
         private DeviceProfilesApi _deviceProfilesApi;
+        private CapabilitiesApi _capabilitiesApi;
+        private PresentationApi _presentationApi;
 
         public SmartThingsClient(string accessToken)
         {
             var configuration = new Configuration();
             configuration.AccessToken = accessToken ?? throw new ArgumentNullException(accessToken);
-            //configuration.BasePath = "https://graph-eu01-euwest1.api.smartthings.com/v1";
 
             _devicesApi = new DevicesApi(configuration);
             _locationsApi = new LocationsApi(configuration);
@@ -49,6 +52,8 @@ namespace SmartThingsTerminal
             _subscriptionsApi = new SubscriptionsApi(configuration);
             _installedAppsApi = new InstalledAppsApi(configuration);
             _deviceProfilesApi = new DeviceProfilesApi(configuration);
+            _capabilitiesApi = new CapabilitiesApi(configuration);
+            _presentationApi = new PresentationApi(configuration);
         }
 
         public void ResetData()
@@ -285,6 +290,53 @@ namespace SmartThingsTerminal
                 }
             }
             return _allSchedules;
+        }
+
+        public PagedCapabilities GetAllCapabilities()
+        {
+            if (_allCapabilities == null)
+            {
+                _allCapabilities = _capabilitiesApi.ListCapabilities();
+            }
+            return _allCapabilities;
+        }
+
+        public Capability GetCapability(string capabilityId, int capabilityVersion)
+        {
+            return _capabilitiesApi.GetCapability(capabilityId, capabilityVersion);
+        }
+
+        public Capability CreateCapability(CreateCapabilityRequest capabilityRequest)
+        {
+            return _capabilitiesApi.CreateCapability(capabilityRequest);
+        }
+
+        public Capability UpdateCapability(string capabilityId, int capabilityVersion, UpdateCapabilityRequest updateCapabilityRequest)
+        {
+            return _capabilitiesApi.UpdateCapability(capabilityId, capabilityVersion, updateCapabilityRequest);
+        }
+
+        public object DeleteCapability(string capabilityId, int capabilityVersion)
+        {
+            return _capabilitiesApi.DeleteCapability(capabilityId, capabilityVersion);
+        }
+
+        public DeviceConfiguration GetDeviceConfiguration(string vid)
+        {
+            if (vid == null)
+            {
+                return _presentationApi.GetDeviceConfiguration(vid);
+            }
+            return null;
+        }
+
+        public DevicePresentation GetDevicePresentation(string deviceId)
+        {
+            if (deviceId == null)
+            {
+                return _presentationApi.GetDevicePresentation(deviceId: deviceId);
+            }
+            return null;
         }
 
         public object ExecuteDevicecommand(string deviceId, DeviceCommandsRequest commandRequest)
