@@ -47,7 +47,7 @@ namespace SmartThingsTerminal.Scenarios
             StatusBar = new StatusBar(new StatusItem[] {
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.F6, "~F6~ Copy Schedule", () => SaveItem(true)),
-                new StatusItem(Key.F9, "~F9~ Delete Schedule", () => DeleteItem()),
+                new StatusItem(Key.F7, "~F7~ Delete Schedule", () => DeleteItem()),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
             });
         }

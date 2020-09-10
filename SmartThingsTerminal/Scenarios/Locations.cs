@@ -20,12 +20,23 @@ namespace SmartThingsTerminal.Scenarios
             {
                 if (STClient.GetAllLocations().Items?.Count > 0)
                 {
-                    dataItemList = STClient.GetAllLocations().Items
+                    // Get the full location details of each location into a dictionary
+                    List<Location> allLocationDetails = new List<Location>();
+                    foreach (var location in STClient.GetAllLocations().Items)
+                    {
+                        var locationDetails = STClient.GetLocationDetails(location.LocationId.ToString());
+                        if (locationDetails != null)
+                        {
+                            allLocationDetails.Add(locationDetails);
+                        }
+                    }
+
+                    dataItemList = allLocationDetails
                         .OrderBy(t => t.Name)
                         .Select(t => new KeyValuePair<string, dynamic>(t.LocationId.ToString(), t))
                         .ToDictionary(t => t.Key, t => t.Value);
 
-                    displayItemList = STClient.GetAllLocations().Items
+                    displayItemList = allLocationDetails
                         .OrderBy(t => t.Name)
                         .Select(t => new KeyValuePair<string, string>(t.LocationId.ToString(), t.Name))
                         .ToDictionary(t => t.Key, t => t.Value);
@@ -51,7 +62,7 @@ namespace SmartThingsTerminal.Scenarios
                 new StatusItem(Key.F4, "~F4~ Save", () => SaveItem(false)),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.F6, "~F6~ Copy Location", () => SaveItem(true)),
-                new StatusItem(Key.F9, "~F9~ Delete Location", () => DeleteItem()),
+                new StatusItem(Key.F7, "~F7~ Delete Location", () => DeleteItem()),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
             });
         }

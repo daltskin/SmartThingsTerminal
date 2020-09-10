@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Terminal.Gui;
+using TextField = Terminal.Gui.TextField;
 
 namespace SmartThingsTerminal.Scenarios
 {
@@ -273,7 +274,7 @@ namespace SmartThingsTerminal.Scenarios
 
                     var command = new DeviceCommand(
                         capability: selectedDevice.Components.FirstOrDefault().Capabilities[_selectedCapabilityIndex].Id,
-                        command: componentCapabilityStatus.Value);
+                        command: (string)componentCapabilityStatus.Value);
 
                     commandsRequest.Commands.Add(command);
                     object response = STClient.ExecuteDevicecommand(selectedDevice.DeviceId, commandsRequest);
