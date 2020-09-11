@@ -281,7 +281,7 @@ namespace SmartThingsTerminal.Scenarios
 
                     var command = new DeviceCommand(
                         capability: selectedDevice.Components.FirstOrDefault().Capabilities[_selectedCapabilityIndex].Id,
-                        command: componentCapabilityStatus.Value.ToString());
+                        command: (string)componentCapabilityStatus.Value);
 
                     commandsRequest.Commands.Add(command);
                     object response = STClient.ExecuteDevicecommand(selectedDevice.DeviceId, commandsRequest);

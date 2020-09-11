@@ -49,7 +49,7 @@ namespace SmartThingsTerminal.Scenarios
                 new StatusItem(Key.F4, "~F4~ Save", () => SaveItem()),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.F6, "~F6~ Copy Room", () => SaveItem(true)),
-                new StatusItem(Key.F9, "~F9~ Delete Room", () => DeleteItem()),
+                new StatusItem(Key.F7, "~F7~ Delete Room", () => DeleteItem()),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
             });
         }

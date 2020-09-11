@@ -182,6 +182,11 @@ namespace SmartThingsTerminal
             return _allLocations;
         }
 
+        public Location GetLocationDetails(string locationId)
+        {
+            return _locationsApi.GetLocation(locationId);
+        }
+
         public async Task<PagedRooms> GetAllRoomsAsync(string locationId)
         {
             if (_allRooms == null)
