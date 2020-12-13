@@ -22,14 +22,16 @@ jobs:
       run: git fetch --prune --unshallow   
         
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.2
+      uses: gittools/actions/gitversion/setup@v0.9.7
       with:
-          versionSpec: '5.2.x'        
+          versionSpec: '5.5.0'
         
-    - name: GitVersion
-      uses: docker://gittools/gitversion:5.2.5-linux-ubuntu-16.04-netcoreapp2.1
-      with:
-        args: /github/workspace /nofetch /output buildserver
+    - name: Determine version
+      uses: gittools/actions/gitversion/execute@v0.9.7
+       
+    - name: Display version
+      run: |
+       echo "SemVer: $GITVERSION_SEMVER"
 
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
@@ -39,21 +41,22 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --configuration Release --no-restore /p:AssemblyVersion=${{ env.GitVersion_AssemblySemVer }} /p:FileVersion=${{ env.GitVersion_AssemblySemFileVer }} /p:InformationalVersion=${{ env.GitVersion_InformationalVersion }}
+      run: dotnet build --configuration Release --no-restore /p:AssemblyVersion=$GITVERSION_SEMVER /p:FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER /p:InformationalVersion=$GITVERSION_INFORMATIONALVERSION
+
     - name: Test
       run: dotnet test --no-restore --verbosity normal
 
     - name: Publish ${{ matrix.runtime }}
-      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v${{ env.GitVersion_SemVer }}/${{ matrix.runtime }} -c Release -r ${{ matrix.runtime }} -f netcoreapp3.1 /p:PublishSingleFile=true /p:DebugType=None /p:AssemblyVersion=${{ env.GitVersion_AssemblySemVer }} /p:FileVersion=${{ env.GitVersion_AssemblySemFileVer }} /p:InformationalVersion=${{ env.GitVersion_InformationalVersion }}
+      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v$GITVERSION_SEMVER/${{ matrix.runtime }} -c Release -r ${{ matrix.runtime }} -f netcoreapp3.1 /p:PublishSingleFile=true /p:DebugType=None /p:AssemblyVersion=$GITVERSION_SEMVER /p:FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER /p:InformationalVersion=$GITVERSION_INFORMATIONALVERSION
 
     - name: Zip ${{ matrix.runtime }} release
       uses: papeloto/action-zip@v1
       with:
-        files: publish/v${{ env.GitVersion_SemVer }}/${{ matrix.runtime }}/
+        files: publish/v${{ env.GITVERSION_SEMVER }}/${{ matrix.runtime }}/
         recursive: true
-        dest: v${{ env.GitVersion_SemVer }}-${{ matrix.runtime }}.zip
+        dest: v${{ env.GITVERSION_SEMVER }}-${{ matrix.runtime }}.zip
 
-    - name: Release ${{ env.GitVersion_SemVer }}
+    - name: Release ${{ env.GITVERSION_SEMVER }}
       if: steps.release_check.outputs.skip_build != 'true' && github.event_name != 'pull_request'
       uses: softprops/action-gh-release@v1
       env:
@@ -61,7 +64,7 @@ jobs:
       with:
         files: |
           **.zip
-        name: ${{ env.GitVersion_SemVer }}
-        tag_name: ${{ env.GitVersion_SemVer }}
+        name: ${{ env.GITVERSION_SEMVER }}
+        tag_name: ${{ env.GITVERSION_SEMVER }}
 
 
