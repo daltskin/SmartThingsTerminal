@@ -42,7 +42,7 @@ namespace SmartThingsTerminal
             var fileMenuBar = new MenuBarItem("_File", fileSubMenu.ToArray());
 
             var colorSchemeBar = new MenuBarItem("_Color Scheme", CreateColorSchemeMenuItems(colorScheme));
-            var aboutBar = new MenuBarItem("_About...", "About this app", () => MessageBox.Query("About SmartThings Terminal", GetAboutMessage(), "Ok"));
+            var aboutBar = new MenuBarItem("_About", "", () => MessageBox.Query("About SmartThings Terminal", GetAboutMessage(), "Ok"));
 
             var menuBar = new MenuBar(new MenuBarItem[] { fileMenuBar, colorSchemeBar, aboutBar });
             return menuBar;
