@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>STT</AssemblyName>
     <RootNamespace>SmartThingsTerminal</RootNamespace>
     <Version>0.9.0</Version>
