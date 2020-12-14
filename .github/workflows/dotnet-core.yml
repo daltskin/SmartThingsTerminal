@@ -57,7 +57,7 @@ jobs:
         dest: v${{ env.GITVERSION_SEMVER }}-${{ matrix.runtime }}.zip
 
     - name: Release ${{ env.GITVERSION_SEMVER }}
-      if: steps.release_check.outputs.skip_build != 'true' && github.event_name != 'pull_request'
+      if: steps.release_check.outputs.skip_build != 'true'
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
