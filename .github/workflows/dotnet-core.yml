@@ -47,7 +47,7 @@ jobs:
       run: dotnet test --no-restore --verbosity normal
 
     - name: Publish ${{ matrix.runtime }}
-      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v$GITVERSION_SEMVER/${{ matrix.runtime }} -c Release -r ${{ matrix.runtime }} -f net5.0 /p:PublishSingleFile=true /p:DebugType=None /p:AssemblyVersion=$GITVERSION_SEMVER /p:FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER /p:InformationalVersion=$GITVERSION_INFORMATIONALVERSION
+      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v$GITVERSION_SEMVER/${{ matrix.runtime }} -c Release -r ${{ matrix.runtime }} -f net5.0 /p:PublishSingleFile=true /p:DebugType=None /p:IncludeNativeLibrariesInSingleFile=true /p:AssemblyVersion=$GITVERSION_SEMVER /p:FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER /p:InformationalVersion=$GITVERSION_INFORMATIONALVERSION
 
     - name: Zip ${{ matrix.runtime }} release
       uses: papeloto/action-zip@v1
