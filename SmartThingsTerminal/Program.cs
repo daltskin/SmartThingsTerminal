@@ -72,6 +72,7 @@ namespace SmartThingsTerminal
                         _runningScenario.Setup();
                         _runningScenario.Run();
                         _runningScenario = null;
+                        Application.Shutdown();
                         return;
                     }
                 }
@@ -90,6 +91,7 @@ namespace SmartThingsTerminal
                 scenario.Setup();
                 scenario.Run();
             }
+            Application.Shutdown();
         }
 
         /// <summary>
@@ -110,7 +112,7 @@ namespace SmartThingsTerminal
             {
                 X = 0,
                 Y = 1, // for menu
-                Width = 40,
+                Width = 30,
                 Height = Dim.Fill(1),
                 CanFocus = false,
             };
@@ -123,11 +125,11 @@ namespace SmartThingsTerminal
                 Width = Dim.Fill(0),
                 Height = Dim.Fill(0),
                 AllowsMarking = false,
-                CanFocus = true,
+                CanFocus = true
             };
             _categoryListView.OpenSelectedItem += (a) =>
             {
-                _top.SetFocus(_rightPane);
+                _rightPane.SetFocus();
             };
             _categoryListView.SelectedItemChanged += CategoryListView_SelectedChanged;
             _leftPane.Add(_categoryListView);
@@ -135,7 +137,7 @@ namespace SmartThingsTerminal
             Label appNameView = new Label() { X = 0, Y = 0, Height = Dim.Fill(), Width = Dim.Fill(), CanFocus = false, Text = MenuHelper.GetAppTitle() };
             _appTitlePane = new FrameView()
             {
-                X = 25,
+                X = 30,
                 Y = 1, // for menu
                 Width = Dim.Fill(),
                 Height = 9,
@@ -145,7 +147,7 @@ namespace SmartThingsTerminal
 
             _rightPane = new FrameView("API Description")
             {
-                X = 25,
+                X = 30,
                 //Y = 1, // for menu
                 Y = Pos.Bottom(_appTitlePane),
                 Width = Dim.Fill(),
@@ -184,7 +186,7 @@ namespace SmartThingsTerminal
                 new StatusItem(Key.F9, "~F9~ Menu", () => {
                     _stClient.ResetData();
                 }),
-                new StatusItem(Key.ControlQ, "~CTRL-Q~ Quit", () => {
+                new StatusItem(Key.Q | Key.CtrlMask, "~CTRL-Q~ Quit", () => {
                     if (_runningScenario is null){
 						// This causes GetScenarioToRun to return null
 						_runningScenario = null;
@@ -203,12 +205,19 @@ namespace SmartThingsTerminal
             _top.Add(_appTitlePane);
             _top.Add(_rightPane);
             _top.Add(_statusBar);
-
+            //_top.Loaded += () =>
+            //{
+            //    if (_runningScenario != null)
+            //    {
+            //        // _top.SetFocus(_rightPane);
+            //        _runningScenario = null;
+            //    }
+            //};
             _top.Ready += () =>
             {
                 if (_runningScenario != null)
                 {
-                   // _top.SetFocus(_rightPane);
+                    // _top.SetFocus(_rightPane);
                     _runningScenario = null;
                 }
             };
