@@ -218,7 +218,7 @@ namespace SmartThingsTerminal.Scenarios
 
             HostPane.Add(_componentFrame);
 
-            HostPane.SetFocus(_componentList);
+            _componentList.SetFocus();
             GetComponentStatus(selectedDevice, 0);
             HostPane.ColorScheme = Colors.TopLevel;
         }
@@ -342,7 +342,7 @@ namespace SmartThingsTerminal.Scenarios
                     _componentFrame = null;
                     _componentList = null;
                     _capabilitiesStatusJsonView = null;
-                    LeftPane.SetFocus(ClassListView);
+                    ClassListView.SetFocus();
                 }
                 else
                 {

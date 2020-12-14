@@ -126,7 +126,7 @@ namespace SmartThingsTerminal.Scenarios
             };
 
             FilePicker.Add(directoryList);
-            FilePicker.SetFocus(directoryList);
+            directoryList.SetFocus();
         }
 
         private void ImportCapability(string filePath)
@@ -179,7 +179,7 @@ namespace SmartThingsTerminal.Scenarios
             _componentFrame.Add(_capabilityPresentationJsonView);
             HostPane.Add(_componentFrame);
 
-            HostPane.SetFocus(_capabilityPresentationJsonView);
+            _capabilityPresentationJsonView.SetFocus();
 
             HostPane.ColorScheme = Colors.TopLevel;
         }
@@ -226,7 +226,7 @@ namespace SmartThingsTerminal.Scenarios
                     _componentFrame = null;
                     _componentList = null;
                     _capabilityPresentationJsonView = null;
-                    LeftPane.SetFocus(ClassListView);
+                    ClassListView.SetFocus();
                 }
                 else
                 {

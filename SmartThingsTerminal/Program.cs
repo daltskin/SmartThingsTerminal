@@ -127,7 +127,7 @@ namespace SmartThingsTerminal
             };
             _categoryListView.OpenSelectedItem += (a) =>
             {
-                _top.SetFocus(_rightPane);
+                _rightPane.SetFocus();
             };
             _categoryListView.SelectedItemChanged += CategoryListView_SelectedChanged;
             _leftPane.Add(_categoryListView);

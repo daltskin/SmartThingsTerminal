@@ -118,7 +118,7 @@ namespace SmartThingsTerminal.Scenarios
             };
 
             FilePicker.Add(directoryList);
-            FilePicker.SetFocus(directoryList);
+            directoryList.SetFocus();
         }
 
         private void ImportSchedule(string filePath)

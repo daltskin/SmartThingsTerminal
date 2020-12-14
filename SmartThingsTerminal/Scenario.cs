@@ -103,7 +103,7 @@ namespace SmartThingsTerminal
             {
                 JsonView.ReadOnly = false;
                 JsonView.ColorScheme = Colors.Menu;
-                HostPane.SetFocus(JsonView);
+                JsonView.SetFocus();
             }
         }
 
@@ -272,7 +272,7 @@ namespace SmartThingsTerminal
 
             GetDirectoriesAndFileView(Directory.GetCurrentDirectory());
             LeftPane.Add(FilePicker);
-            LeftPane.SetFocus(FilePicker);
+            FilePicker.SetFocus();
         }
 
         public virtual void GetDirectoriesAndFileView(string currentDirectory)
@@ -367,11 +367,12 @@ namespace SmartThingsTerminal
                 X = 0,
                 Y = Pos.Bottom(HostPane),
                 IsDefault = true,
-                Clicked = () =>
-                {
-                    Top.Remove(StatusButton);
-                }
             };
+            StatusButton.Clicked += () => 
+            { 
+                Top.Remove(StatusButton); 
+            };
+
             Top.Add(StatusButton);
         }
 
@@ -522,7 +523,7 @@ namespace SmartThingsTerminal
         public virtual void Run()
         {
             // This method already performs a later automatic shutdown.
-            Application.Run(Top, false);
+            Application.Run(Top);
         }
 
         /// <summary>

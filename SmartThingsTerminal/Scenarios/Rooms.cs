@@ -124,7 +124,7 @@ namespace SmartThingsTerminal.Scenarios
             };
 
             FilePicker.Add(directoryList);
-            FilePicker.SetFocus(directoryList);
+            directoryList.SetFocus();
         }
 
         private void ImportRoom(string filePath)
