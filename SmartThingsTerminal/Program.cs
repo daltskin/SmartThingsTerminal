@@ -1,5 +1,4 @@
-﻿using CommandLine;
-using NStack;
+﻿using NStack;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,18 +32,13 @@ namespace SmartThingsTerminal
         private static bool _useSystemConsole = false;
         private static SmartThingsClient _stClient;
 
-        public class Options
-        {
-            [Option('t', "accesstoken", Required = true, HelpText = "OAuth Personal access token - generate from: https://account.smartthings.com/tokens")]
-            public string AccessToken { get; set; }
-
-            [Option('s', "screen", Required = false, HelpText = "Jump into a specific screen: [devices/installedapps/locations/rules/scenes/schedules/subscriptions]")]
-            public string ApiName { get; set; }
-        }
-
         static void Main(string[] args)
         {
-            CommandLine.Parser.Default.ParseArguments<Options>(args).WithParsed(Init);
+            Startup startup = new Startup();
+            if (startup.Configure(args))
+            {
+                Init(startup.Options);
+            }
         }
 
         private static void Init(Options opts)
