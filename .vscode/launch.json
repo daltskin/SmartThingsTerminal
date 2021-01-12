@@ -10,9 +10,14 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "/mnt/c/@SourceControl/Github/SmartThingsTerminal/SmartThingsTerminal/bin/Debug/netcoreapp3.1/STT.dll",
-            "args": ["-t {accessToken}"],
-            "cwd": "/mnt/c/@SourceControl/Github/SmartThingsTerminal/SmartThingsTerminal",
+            "program": "${workspaceFolder}/SmartThingsTerminal/bin/Debug/net5.0/STT.dll",
+            // Args takes precendence over environment variables
+            //"args": ["-t {accessToken}"],
+            //"env": {
+            //    "STT_ACCESSTOKEN": "{accessToken}"
+            // You can also place this env variable in a `local.env` file
+            //},
+            "cwd": "${workspaceFolder}/SmartThingsTerminal",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "integratedTerminal",
             "stopAtEntry": false

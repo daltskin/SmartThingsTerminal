@@ -72,6 +72,12 @@ eg:
 $ ./STT -t {accesstoken} -s devices
 ```
 
+## Environment variables
+
+You can use an environment variable called `STT_ACCESSTOKEN` and `STT_SCREEN` in place of the command line arguments should you wish to not have to pass them on the command line. The Command Line takes precendence over any environment variables. In order of importance :- 
+- `local.env` file in the directory of the executable. VSCode is configured to copy this file to the target directory if you add it to the `SmartThingsTerminal` folder (same level as the csproj)
+- system environment variable. This is only used if command line or `.env` file are not present. An example is left commented out in the `launch.json` file.
+
 ## Full feature list
 
 * View Capability Summaries

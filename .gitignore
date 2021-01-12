@@ -341,3 +341,4 @@ healthchecksdb
 
 Properties/launchSettings.json
 /SmartThingsTerminal/Properties/launchSettings.json
+local.env
