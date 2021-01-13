@@ -2,11 +2,19 @@
 name: .NET Core
 
 on:
+
   push:
     branches: [ master ]
     paths-ignore: 
       - 'docs/**'
       - '**.md'
+
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
 
 jobs:
   buildJob:
