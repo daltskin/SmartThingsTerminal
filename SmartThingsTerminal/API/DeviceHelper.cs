@@ -38,7 +38,6 @@ namespace SmartThingsTerminal
                 DeviceCommand command = new DeviceCommand(capability: "switch", command: newState);
                 commandsRequest.Commands.Add(command);
                 this.smartThingsClient.ExecuteDevicecommand(this.device.DeviceId, commandsRequest);
-                //ShowStatusBarMessage($"Switch {newState} at {DateTime.UtcNow.ToLongTimeString()}");
 
                 return true;
             }
