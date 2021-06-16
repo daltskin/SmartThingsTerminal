@@ -170,7 +170,7 @@ namespace SmartThingsTerminal.Scenarios
         {
             StatusBar = new StatusBar(new StatusItem[] {
                 new StatusItem(Key.F1, "~F1~ Component Status", () => ToggleComponentStatus()),
-                new StatusItem(Key.F4, "~F4~ Toggle Device Switch", () => ToggleDeviceSwitch()),
+                new StatusItem(Key.F4, "~F4~ Toggle Device Switch", () => ToggleDevice()),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.F9, "~F9~ Menu", () => { }),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
@@ -223,29 +223,17 @@ namespace SmartThingsTerminal.Scenarios
             HostPane.ColorScheme = Colors.TopLevel;
         }
 
-        private void ToggleDeviceSwitch()
+        private void ToggleDevice()
         {
             if (SelectedItem != null)
             {
                 Device selectedDevice = (Device)SelectedItem;
                 try
                 {
-                    var deviceCurrentStatus = STClient.GetDeviceCapabilityStatus(selectedDevice.DeviceId, selectedDevice.Components[0].Id, "switch");
-
-                    if (deviceCurrentStatus.Count > 0)
+                    var deviceHelper = new DeviceHelper(STClient, selectedDevice);
+                    if (!deviceHelper.ToggleDevice())
                     {
-                        string state = deviceCurrentStatus["switch"].Value.ToString().ToLower();
-                        string newState = state == "on" ? "off" : "on";
-
-                        DeviceCommandsRequest commandsRequest = new DeviceCommandsRequest() { Commands = new List<DeviceCommand>() };
-                        DeviceCommand command = new DeviceCommand(capability: "switch", command: newState);
-                        commandsRequest.Commands.Add(command);
-                        STClient.ExecuteDevicecommand(selectedDevice.DeviceId, commandsRequest);
-                        //ShowStatusBarMessage($"Switch {newState} at {DateTime.UtcNow.ToLongTimeString()}");
-                    }
-                    else
-                    {
-                        ShowErrorMessage($"{selectedDevice.Name} has no switch capability");
+                        ShowErrorMessage($"Cannot toggle {selectedDevice.Name}.");
                     }
                 }
                 catch (SmartThingsNet.Client.ApiException exp)
