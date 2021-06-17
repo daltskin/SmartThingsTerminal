@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using SmartThingsNet.Model;
 
@@ -17,12 +16,12 @@ namespace SmartThingsTerminal
 
         public bool ToggleDevice()
         {
-            if (!ToggleDeviceSwitch())
+            if (ToggleDeviceSwitch() || ToggleDeviceSwitchLevel())
             {
-                return ToggleDeviceWindowShade();
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         private bool ToggleDeviceSwitch()
@@ -47,17 +46,18 @@ namespace SmartThingsTerminal
             }
         }
 
-        private bool ToggleDeviceWindowShade()
+        private bool ToggleDeviceSwitchLevel()
         {
             var deviceCurrentStatus = new Dictionary<string, AttributeState>();
-            if (this.smartThingsClient.TryGetDeviceCapabilityStatus(this.device.DeviceId, this.device.Components[0].Id, "windowShade", out deviceCurrentStatus)
+            if (this.smartThingsClient.TryGetDeviceCapabilityStatus(this.device.DeviceId, this.device.Components[0].Id, "switchLevel", out deviceCurrentStatus)
                 && deviceCurrentStatus.Count > 0)
             {
-                string state = deviceCurrentStatus["windowShade"].Value.ToString().ToLower();
-                string newState = state == "open" ? "close" : "open";
+                string currentLevel = deviceCurrentStatus["level"].Value.ToString();
 
-                DeviceCommandsRequest commandsRequest = new DeviceCommandsRequest() { Commands = new List<DeviceCommand>() };
-                DeviceCommand command = new DeviceCommand(capability: "windowShade", command: newState);
+                var commandArgs = new List<object>() { { currentLevel == "0" ? 100 : 0 } };
+                var command = new DeviceCommand(capability: "switchLevel", command: "setLevel", arguments: commandArgs);
+
+                var commandsRequest = new DeviceCommandsRequest() { Commands = new List<DeviceCommand>() };
                 commandsRequest.Commands.Add(command);
                 this.smartThingsClient.ExecuteDevicecommand(this.device.DeviceId, commandsRequest);
 
