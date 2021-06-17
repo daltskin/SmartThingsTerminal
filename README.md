@@ -87,7 +87,7 @@ You can use an environment variable called `STT_ACCESSTOKEN` and `STT_SCREEN` in
 * View Devices
   * View all of the registered devices
   * View device components status
-  * Toggle lights/switches on/off
+  * Toggle lights/switches on/off or Window Shades open/closed
   * Export device to a json file
 * Install Applications
   * View details of installed applications
