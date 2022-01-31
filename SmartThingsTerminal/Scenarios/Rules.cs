@@ -46,11 +46,11 @@ namespace SmartThingsTerminal.Scenarios
         {
             StatusBar = new StatusBar(new StatusItem[] {
                 //new StatusItem(Key.F2, "~F2~ Import rule", () => ToggleImport()),
-                new StatusItem(Key.F3, "~F3~ Edit", () => EnableEditMode()),
-                new StatusItem(Key.F4, "~F4~ Save", () => SaveItem()),
-                new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
-                new StatusItem(Key.F6, "~F6~ Copy Rule", () => SaveItem(true)),
-                new StatusItem(Key.F7, "~F7~ Delete Rule", () => DeleteItem()),
+                //new StatusItem(Key.F3, "~F3~ Edit", () => EnableEditMode()),
+                //new StatusItem(Key.F4, "~F4~ Save", () => SaveItem()),
+                //new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
+                //new StatusItem(Key.F6, "~F6~ Copy Rule", () => SaveItem(true)),
+                //new StatusItem(Key.F7, "~F7~ Delete Rule", () => DeleteItem()),
                 new StatusItem(Key.Home, "~Home~ Back", () => Quit())
             });
         }
@@ -64,7 +64,7 @@ namespace SmartThingsTerminal.Scenarios
                 try
                 {
                     var rule = JsonConvert.DeserializeObject<Rule>(json);
-                    RuleRequest ruleRequest = new RuleRequest(rule.Name, rule.Actions, rule.TimeZoneId);
+                    RuleRequest ruleRequest = new RuleRequest(rule.Name, rule.Actions, null, rule.TimeZoneId);
 
                     string locationId = GetRuleLocation(rule);
                     if (copyCurrent)
@@ -150,7 +150,7 @@ namespace SmartThingsTerminal.Scenarios
             {
                 string json = File.ReadAllText(filePath);
                 var rule = JsonConvert.DeserializeObject<Rule>(json);
-                RuleRequest ruleRequest = new RuleRequest(rule.Name, rule.Actions, rule.TimeZoneId);
+                RuleRequest ruleRequest = new RuleRequest(rule.Name, rule.Actions, null, rule.TimeZoneId);
 
                 // TODO: prompt for which location
                 string locationId = STClient.GetAllLocations().Items.FirstOrDefault().LocationId.ToString();

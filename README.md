@@ -21,10 +21,9 @@ This CLI tool has the following features:
 | Devices | * | n/a | * | * | n/a | n/a | n/a | n/a | 
 | Locations | * | n/a | * | n/a | n/a | * | * | * | 
 | Rooms | * | n/a | * | n/a | n/a | * | * | * | 
-| Rules | * | * | * | n/a | n/a | * | * | * |
+| Rules | * | * | * | n/a | n/a | n/a | n/a | n/a |
 | Scenes | * | n/a | * | * | n/a | n/a | n/a | n/a |
 | Schedules | * | n/a | * | n/a | n/a | * | * | * |
-| Subscriptions | * | n/a | * | n/a | n/a | * | * | * |
 | Installed Apps | * | n/a | * | n/a | n/a | n/a | n/a | n/a |
 
 *Some n/a features are due to the underlying API availability.*
@@ -106,11 +105,6 @@ You can use an environment variable called `STT_ACCESSTOKEN` and `STT_SCREEN` in
   * Export room to a json file
 * Rules
   * View rules
-  * Edit rules
-  * Copy rules
-  * Delete rules
-  * Import rules (from a json file in the current directory)
-  * Export rule to a json file
 * Scenes
   * View scene details
   * Run scenes
@@ -120,12 +114,6 @@ You can use an environment variable called `STT_ACCESSTOKEN` and `STT_SCREEN` in
   * Copy schedules (untested)
   * Delete schedules (untested)
   * Export schedule to a json file
-* Subscriptions (untested)
-  * View integration notification events
-  * Copy subscriptions
-  * Delete subscriptions
-  * Export subscription to a json file
-
 
 # Credits
 
