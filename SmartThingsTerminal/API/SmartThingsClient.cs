@@ -101,7 +101,7 @@ namespace SmartThingsTerminal
             {
                 if (locationId != null)
                 {
-                    _allInstalledApps = _installedAppsApi.ListInstallations(locationId);
+                    _allInstalledApps = _installedAppsApi.ListInstallations(_accessToken, locationId);
                 }
                 else
                 {
@@ -111,7 +111,7 @@ namespace SmartThingsTerminal
                     {
                         foreach (var location in locations.Items)
                         {
-                            var locationApps = _installedAppsApi.ListInstallations(location.LocationId.ToString());
+                            var locationApps = _installedAppsApi.ListInstallations(_accessToken, location.LocationId.ToString());
                             if (locationApps.Items?.Count > 0)
                             {
                                 _allInstalledApps.Items ??= new List<InstalledApp>();
