@@ -58,7 +58,7 @@ jobs:
       run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v$GITVERSION_SEMVER/${{ matrix.runtime }} -c Release -r ${{ matrix.runtime }} -f net5.0 /p:PublishSingleFile=true /p:DebugType=None /p:IncludeNativeLibrariesForSelfExtract=true /p:AssemblyVersion=$GITVERSION_SEMVER /p:FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER /p:InformationalVersion=$GITVERSION_SEMVER
 
     - name: Zip ${{ matrix.runtime }} release
-      run: 7z a {{ matrix.runtime }}.zip .\publish\v${{ env.GITVERSION_SEMVER }}\${{ matrix.runtime }}\
+      run: 7z a ${{ matrix.runtime }}.zip .\publish\v${{ env.GITVERSION_SEMVER }}\${{ matrix.runtime }}\
 
     - name: Release ${{ env.GITVERSION_SEMVER }}
       if: steps.release_check.outputs.skip_build != 'true'
