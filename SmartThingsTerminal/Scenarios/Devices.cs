@@ -150,7 +150,7 @@ namespace SmartThingsTerminal.Scenarios
             string roomName = "";
             if (device.RoomId != null)
             {
-                roomName = STClient.GetAllRooms(device.LocationId).Items.Where(r => r.RoomId.ToString().Equals(device.RoomId))?.FirstOrDefault().Name;
+                roomName = STClient.GetAllRooms(device.LocationId).Items.Where(r => r.RoomId.ToString().Equals(device.RoomId))?.FirstOrDefault()?.Name;
             }
 
             var labelLocation = new Label("Location:") { X = 0, Y = 0 };
