@@ -15,7 +15,7 @@ namespace SmartThingsTerminal
         private PagedDevices _allDevices;
         private PagedLocations _allLocations;
         private PagedRooms _allRooms;
-        private PagedScene _allScenes;
+        private ScenePagedResult _allScenes;
         private PagedRules _allRules;
         private PagedSchedules _allSchedules;
         private PagedApps _allApps;
@@ -32,15 +32,17 @@ namespace SmartThingsTerminal
         private SchedulesApi _schedulesApi;
         private AppsApi _appsApi;
         private SubscriptionsApi _subscriptionsApi;
-        private InstalledAppsApi _installedAppsApi;
-        private DeviceProfilesApi _deviceProfilesApi;
+        private InstalledappsApi _installedAppsApi;
+        private ProfilesApi _deviceProfilesApi;
         private CapabilitiesApi _capabilitiesApi;
-        private PresentationApi _presentationApi;
+        private PresentationsApi _presentationApi;
+        private string _accessToken;
 
         public SmartThingsClient(string accessToken)
         {
             var configuration = new Configuration();
             configuration.AccessToken = accessToken ?? throw new ArgumentNullException(accessToken);
+            _accessToken = accessToken;
 
             _devicesApi = new DevicesApi(configuration);
             _locationsApi = new LocationsApi(configuration);
@@ -50,10 +52,24 @@ namespace SmartThingsTerminal
             _schedulesApi = new SchedulesApi(configuration);
             _appsApi = new AppsApi(configuration);
             _subscriptionsApi = new SubscriptionsApi(configuration);
-            _installedAppsApi = new InstalledAppsApi(configuration);
-            _deviceProfilesApi = new DeviceProfilesApi(configuration);
+            _installedAppsApi = new InstalledappsApi(configuration);
+            _deviceProfilesApi = new ProfilesApi(configuration);
             _capabilitiesApi = new CapabilitiesApi(configuration);
-            _presentationApi = new PresentationApi(configuration);
+            _presentationApi = new PresentationsApi(configuration);
+
+            //_accessToken = accessToken;
+            //_devicesApi = new DevicesApi();
+            //_locationsApi = new LocationsApi();
+            //_roomsApi = new RoomsApi();
+            //_scenesApi = new ScenesApi();
+            //_rulesApi = new RulesApi();
+            //_schedulesApi = new SchedulesApi();
+            //_appsApi = new AppsApi();
+            //_subscriptionsApi = new SubscriptionsApi();
+            //_installedAppsApi = new InstalledappsApi();
+            //_deviceProfilesApi = new ProfilesApi();
+            //_capabilitiesApi = new CapabilitiesApi();
+            //_presentationApi = new PresentationsApi();
         }
 
         public void ResetData()
@@ -74,7 +90,7 @@ namespace SmartThingsTerminal
         {
             if (_allApps == null)
             {
-                _allApps = _appsApi.ListApps();
+                _allApps = _appsApi.ListApps(_accessToken);
             }
             return _allApps;
         }
@@ -114,7 +130,7 @@ namespace SmartThingsTerminal
             {
                 if (appId != null)
                 {
-                    _allSubscriptions = _subscriptionsApi.ListSubscriptions(appId);
+                    _allSubscriptions = _subscriptionsApi.ListSubscriptions(appId, _accessToken);
                 }
                 else
                 {
@@ -124,7 +140,7 @@ namespace SmartThingsTerminal
                     {
                         foreach (var app in apps.Items)
                         {
-                            var appSubscriptions = _subscriptionsApi.ListSubscriptions(app.InstalledAppId.ToString());
+                            var appSubscriptions = _subscriptionsApi.ListSubscriptions(app.InstalledAppId.ToString(), _accessToken);
                             if (appSubscriptions.Items?.Count > 0)
                             {
                                 _allSubscriptions.Items ??= new List<Subscription>();
@@ -141,7 +157,7 @@ namespace SmartThingsTerminal
         {
             if (_allDevices == null)
             {
-                _allDevices = await _devicesApi.GetDevicesAsync();
+                _allDevices = await _devicesApi.GetDevicesAsync(_accessToken);
             }
             return _allDevices;
         }
@@ -150,7 +166,7 @@ namespace SmartThingsTerminal
         {
             if (_allDevices == null)
             {
-                _allDevices = _devicesApi.GetDevices();
+                _allDevices = _devicesApi.GetDevices(_accessToken);
             }
             return _allDevices;
         }
@@ -159,7 +175,7 @@ namespace SmartThingsTerminal
         {
             if (_allDeviceProfiles == null)
             {
-                _allDeviceProfiles = _deviceProfilesApi.ListDeviceProfiles();
+                _allDeviceProfiles = _deviceProfilesApi.ListDeviceProfiles(_accessToken);
             }
             return _allDeviceProfiles;
         }
@@ -168,7 +184,7 @@ namespace SmartThingsTerminal
         {
             if (_allLocations == null)
             {
-                _allLocations = await _locationsApi.ListLocationsAsync();
+                _allLocations = await _locationsApi.ListLocationsAsync(_accessToken);
             }
             return _allLocations;
         }
@@ -177,21 +193,21 @@ namespace SmartThingsTerminal
         {
             if (_allLocations == null)
             {
-                _allLocations = _locationsApi.ListLocations();
+                _allLocations = _locationsApi.ListLocations(_accessToken);
             }
             return _allLocations;
         }
 
         public Location GetLocationDetails(string locationId)
         {
-            return _locationsApi.GetLocation(locationId);
+            return _locationsApi.GetLocation(_accessToken, locationId);
         }
 
         public async Task<PagedRooms> GetAllRoomsAsync(string locationId)
         {
             if (_allRooms == null)
             {
-                _allRooms = await _roomsApi.ListRoomsAsync(locationId);
+                _allRooms = await _roomsApi.ListRoomsAsync(_accessToken, locationId);
             }
             return _allRooms;
         }
@@ -202,7 +218,7 @@ namespace SmartThingsTerminal
             {
                 if (locationId != null)
                 {
-                    _allRooms = _roomsApi.ListRooms(locationId);
+                    _allRooms = _roomsApi.ListRooms(_accessToken, locationId);
                 }
                 else
                 {
@@ -212,7 +228,7 @@ namespace SmartThingsTerminal
                     {
                         foreach (var location in locations.Items)
                         {
-                            var locationRooms = _roomsApi.ListRooms(location.LocationId.ToString());
+                            var locationRooms = _roomsApi.ListRooms(_accessToken, location.LocationId.ToString());
                             if (locationRooms.Items?.Count > 0)
                             {
                                 _allRooms.Items ??= new List<SmartThingsNet.Model.Room>();
@@ -225,11 +241,11 @@ namespace SmartThingsTerminal
             return _allRooms;
         }
 
-        public PagedScene GetAllScenes(string locationId = null)
+        public ScenePagedResult GetAllScenes(string locationId = null)
         {
             if (_allScenes == null)
             {
-                _allScenes = _scenesApi.ListScenes(locationId);
+                _allScenes = _scenesApi.ListScenes("", locationId);
             }
             return _allScenes;
         }
@@ -240,7 +256,7 @@ namespace SmartThingsTerminal
             {
                 if (locationId != null)
                 {
-                    _allRules = _rulesApi.ListRules(locationId);
+                    _allRules = _rulesApi.ListRules(_accessToken, locationId);
                 }
                 else
                 {
@@ -250,7 +266,7 @@ namespace SmartThingsTerminal
                     {
                         foreach (var location in locations.Items)
                         {
-                            var locationRules = _rulesApi.ListRules(location.LocationId.ToString());
+                            var locationRules = _rulesApi.ListRules(_accessToken, location.LocationId.ToString());
                             if (locationRules.Items?.Count > 0)
                             {
                                 _allRules.Items ??= new List<Rule>();
@@ -269,7 +285,7 @@ namespace SmartThingsTerminal
             {
                 if (appId != null)
                 {
-                    _allSchedules = _schedulesApi.GetSchedules(appId);
+                    _allSchedules = _schedulesApi.GetSchedules(appId, _accessToken);
                 }
                 else
                 {
@@ -279,7 +295,7 @@ namespace SmartThingsTerminal
                     {
                         foreach (var app in apps.Items)
                         {
-                            var appSchedules = _schedulesApi.GetSchedules(app.InstalledAppId.ToString());
+                            var appSchedules = _schedulesApi.GetSchedules(app.InstalledAppId.ToString(), _accessToken);
                             if (appSchedules.Items?.Count > 0)
                             {
                                 _allSchedules.Items ??= new List<Schedule>();
@@ -296,142 +312,142 @@ namespace SmartThingsTerminal
         {
             if (_allCapabilities == null)
             {
-                _allCapabilities = _capabilitiesApi.ListCapabilities();
+                _allCapabilities = _capabilitiesApi.ListCapabilities(_accessToken);
             }
             return _allCapabilities;
         }
 
         public Capability GetCapability(string capabilityId, int capabilityVersion)
         {
-            return _capabilitiesApi.GetCapability(capabilityId, capabilityVersion);
+            return _capabilitiesApi.GetCapability(_accessToken, capabilityId, capabilityVersion);
         }
 
         public Capability CreateCapability(CreateCapabilityRequest capabilityRequest)
         {
-            return _capabilitiesApi.CreateCapability(capabilityRequest);
+            return _capabilitiesApi.CreateCapability(_accessToken, capabilityRequest);
         }
 
         public Capability UpdateCapability(string capabilityId, int capabilityVersion, UpdateCapabilityRequest updateCapabilityRequest)
         {
-            return _capabilitiesApi.UpdateCapability(capabilityId, capabilityVersion, updateCapabilityRequest);
+            return _capabilitiesApi.UpdateCapability(_accessToken, capabilityId, capabilityVersion, updateCapabilityRequest);
         }
 
         public object DeleteCapability(string capabilityId, int capabilityVersion)
         {
-            return _capabilitiesApi.DeleteCapability(capabilityId, capabilityVersion);
+            return _capabilitiesApi.DeleteCapability(_accessToken, capabilityId, capabilityVersion);
         }
 
-        public DeviceConfiguration GetDeviceConfiguration(string vid)
+        public PublicDeviceConfiguration GetDeviceConfiguration(string presentationId)
         {
-            if (vid == null)
+            if (presentationId == null)
             {
-                return _presentationApi.GetDeviceConfiguration(vid);
+                return _presentationApi.GetDeviceConfiguration(_accessToken, presentationId);
             }
             return null;
         }
 
-        public DevicePresentation GetDevicePresentation(string deviceId)
+        public DossierDevicePresentation GetDevicePresentation(string presentationId)
         {
-            if (deviceId == null)
+            if (presentationId == null)
             {
-                return _presentationApi.GetDevicePresentation(deviceId: deviceId);
+                return _presentationApi.GetDevicePresentation(_accessToken, presentationId);
             }
             return null;
         }
 
         public object ExecuteDevicecommand(string deviceId, DeviceCommandsRequest commandRequest)
         {
-            return _devicesApi.ExecuteDeviceCommands(deviceId, commandRequest);
+            return _devicesApi.ExecuteDeviceCommands(_accessToken, deviceId, commandRequest);
         }
 
         public Dictionary<string, AttributeState> GetDeviceCapabilityStatus(string deviceId, string componentId, string capabilityId)
         {
-            return _devicesApi.GetDeviceStatusByCapability(deviceId, componentId, capabilityId);
+            return _devicesApi.GetDeviceStatusByCapability(_accessToken, deviceId, componentId, capabilityId);
         }
 
         public StandardSuccessResponse RunScene(string sceneId)
         {
-            return _scenesApi.ExecuteScene(sceneId);
+            return _scenesApi.ExecuteScene(_accessToken, sceneId);
         }
 
         public Device UpdateDevice(string deviceId, UpdateDeviceRequest updateDeviceRequest)
         {
-            return _devicesApi.UpdateDevice(deviceId, updateDeviceRequest);
+            return _devicesApi.UpdateDevice(_accessToken, deviceId, updateDeviceRequest);
         }
 
         public object DeleteDevice(string deviceId)
         {
-            return _devicesApi.DeleteDevice(deviceId);
+            return _devicesApi.DeleteDevice(_accessToken, deviceId);
         }
 
         public Rule UpdateRule(string ruleId, string locationId, RuleRequest ruleRequest)
         {
-            return _rulesApi.UpdateRule(ruleId, locationId, ruleRequest);
+            return _rulesApi.UpdateRule(_accessToken, ruleId, locationId, ruleRequest);
         }
 
         public object CreateRule(string locationId, RuleRequest ruleRequest)
         {
-            return _rulesApi.CreateRule(locationId, ruleRequest);
+            return _rulesApi.CreateRule(_accessToken, locationId, ruleRequest);
         }
 
         public Rule DeleteRule(string ruleId, string locationId)
         {
-            return _rulesApi.DeleteRule(ruleId, locationId);
+            return _rulesApi.DeleteRule(_accessToken, ruleId, locationId);
         }
 
         public Location UpdateLocation(string locationId, UpdateLocationRequest locationRequest)
         {
-            return _locationsApi.UpdateLocation(locationId, locationRequest);
+            return _locationsApi.UpdateLocation(_accessToken, locationId, locationRequest);
         }
 
         public Location CreateLocation(CreateLocationRequest locationRequest)
         {
-            return _locationsApi.CreateLocation(locationRequest);
+            return _locationsApi.CreateLocation(_accessToken, locationRequest);
         }
 
         public object DeleteLocation(string locationId)
         {
-            return _locationsApi.DeleteLocation(locationId);
+            return _locationsApi.DeleteLocation(_accessToken, locationId);
         }
 
         public Room UpdateRoom(string locationId, string roomId, UpdateRoomRequest roomRequest)
         {
-            return _roomsApi.UpdateRoom(locationId, roomId, roomRequest);
+            return _roomsApi.UpdateRoom(_accessToken, locationId, roomId, roomRequest);
         }
 
         public Room CreateRoom(string locationId, CreateRoomRequest roomRequest)
         {
-            return _roomsApi.CreateRoom(locationId, roomRequest);
+            return _roomsApi.CreateRoom(_accessToken, locationId, roomRequest);
         }
 
         public object DeleteRoom(string locationId, string roomId)
         {
-            return _roomsApi.DeleteRoom(locationId, roomId);
+            return _roomsApi.DeleteRoom(_accessToken, locationId, roomId);
         }
 
         public App UpdateApp(string appName, UpdateAppRequest updateAppRequest)
         {
-            return _appsApi.UpdateApp(appName,updateAppRequest);
+            return _appsApi.UpdateApp(_accessToken, appName,updateAppRequest);
         }
 
         public Schedule CreateSchedule(string installedAppId, ScheduleRequest scheduleRequest)
         {
-            return _schedulesApi.CreateSchedule(installedAppId, scheduleRequest);
+            return _schedulesApi.CreateSchedule(installedAppId, _accessToken, scheduleRequest);
         }
 
         public object DeleteSchedule(string installedAppId, string scheduleName)
         {
-            return _schedulesApi.DeleteSchedule(installedAppId, scheduleName);
+            return _schedulesApi.DeleteSchedule(installedAppId, scheduleName, _accessToken);
         }
 
         public Subscription SaveSubscription(string installedAppId, SubscriptionRequest subscriptionRequest)
         {
-            return _subscriptionsApi.SaveSubscription(installedAppId, subscriptionRequest);
+            return _subscriptionsApi.SaveSubscription(installedAppId, _accessToken, subscriptionRequest);
         }
 
         public SubscriptionDelete DeleteSubscription(string installedAppId, string subscriptionId)
         {
-            return _subscriptionsApi.DeleteSubscription(installedAppId, subscriptionId);
+            return _subscriptionsApi.DeleteSubscription(installedAppId, subscriptionId, _accessToken);
         }
 
         protected virtual void Dispose(bool disposing)

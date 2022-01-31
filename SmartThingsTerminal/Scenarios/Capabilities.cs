@@ -106,7 +106,7 @@ namespace SmartThingsTerminal.Scenarios
 
             var labelType = new Label("Version:") { X = 0, Y = 2 };
             SettingsPane.Add(labelType);
-            var deviceType = new TextField($"{capability.Version}") { X = Pos.Right(labelType) + 1, Y = 2, Width = 40 };
+            var deviceType = new TextField($"{capability._Version}") { X = Pos.Right(labelType) + 1, Y = 2, Width = 40 };
             deviceType.ColorScheme = Colors.Base;
             SettingsPane.Add(deviceType);
         }
@@ -136,7 +136,7 @@ namespace SmartThingsTerminal.Scenarios
                 string json = File.ReadAllText(filePath);
                 var capability = JsonConvert.DeserializeObject<Capability>(json);
 
-                var capabilityRequest = new CreateCapabilityRequest(capability.Id, capability.Attributes, capability.Commands);
+                var capabilityRequest = new CreateCapabilityRequest(capability.Id, false, capability.Attributes, capability.Commands);
                 STClient.CreateCapability(capabilityRequest);
                 ShowMessage($"Capability added!");
             }
@@ -198,7 +198,7 @@ namespace SmartThingsTerminal.Scenarios
         {
             try
             {
-                var capbility = STClient.GetCapability(selectedCapability.Id, selectedCapability.Version);
+                var capbility = STClient.GetCapability(selectedCapability.Id, selectedCapability._Version);
                 if (capbility != null)
                 {
                     _capabilityPresentationJsonView.Text = FormatJson(capbility.ToJson());
