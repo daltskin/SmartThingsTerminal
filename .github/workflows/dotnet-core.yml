@@ -50,7 +50,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.101
+        dotnet-version: 6.0.101
 
     - name: Install dependencies
       run: dotnet restore
@@ -67,7 +67,7 @@ jobs:
       run: 7z a ${{ matrix.runtime }}.zip ./publish/v${{ env.GITVERSION_SEMVER }}/${{ matrix.runtime }}/*
 
     - name: Release ${{ env.GITVERSION_SEMVER }}
-      if: steps.release_check.outputs.skip_build != 'true'
+      if: github.ref == 'refs/heads/master'
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
