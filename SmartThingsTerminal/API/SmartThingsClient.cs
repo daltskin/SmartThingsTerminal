@@ -360,6 +360,21 @@ namespace SmartThingsTerminal
             return _devicesApi.ExecuteDeviceCommands(_accessToken, deviceId, commandRequest);
         }
 
+        public bool TryGetDeviceCapabilityStatus(string deviceId, string componentId, string capabilityId, out Dictionary<string, AttributeState> capabilityStatus)
+        {
+            capabilityStatus = new Dictionary<string, AttributeState>();
+
+            try
+            {
+                capabilityStatus = GetDeviceCapabilityStatus(deviceId, componentId, capabilityId);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public Dictionary<string, AttributeState> GetDeviceCapabilityStatus(string deviceId, string componentId, string capabilityId)
         {
             return _devicesApi.GetDeviceStatusByCapability(_accessToken, deviceId, componentId, capabilityId);
