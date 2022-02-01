@@ -9,6 +9,12 @@ on:
       - 'docs/**'
       - '**.md'
 
+  pull_request:
+    branches: [ master ]
+    paths-ignore: 
+      - 'docs/**'
+      - '**.md'
+
   workflow_dispatch:
     inputs:
       logLevel:
@@ -22,7 +28,7 @@ jobs:
     
     strategy:
       matrix:
-        runtime: ["win-x86", "win-arm", "win-arm64", "win7-x64", "win7-x86", "win81-x64", "win81-x86", "win81-arm", "win10-x64", "win10-x86", "win10-arm", "win10-arm64", "linux-x64", "linux-musl-x64", "linux-arm", "linux-arm64", "rhel-x64", "rhel.8-x64", "osx-x64", "osx.10.10-x64", "osx.10.11-x64", "osx.10.12-x64", "osx.10.13-x64", "osx.10.14-x64"]
+        runtime: ["win-x86", "win-arm", "win-arm64", "win10-x64", "win10-x86", "win10-arm", "win10-arm64", "linux-x64", "linux-musl-x64", "linux-arm", "linux-arm64", "rhel-x64", "rhel.8-x64", "osx-x64", "osx.10.14-x64"]
 
     steps:
     - uses: actions/checkout@v2
@@ -44,24 +50,24 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.101
+        dotnet-version: 6.0.101
 
     - name: Install dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --configuration Release --no-restore /p:AssemblyVersion=$GITVERSION_SEMVER /p:FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER /p:InformationalVersion=$GITVERSION_SEMVER
+      run: dotnet build --configuration Release --no-restore -p:AssemblyVersion=$GITVERSION_ASSEMBLYSEMFILEVER -p:FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER -p:InformationalVersion=$GITVERSION_SEMVER
 
     - name: Test
       run: dotnet test --no-restore --verbosity normal
 
     - name: Publish ${{ matrix.runtime }}
-      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v$GITVERSION_SEMVER/${{ matrix.runtime }} -c Release -r ${{ matrix.runtime }} -f net5.0 /p:PublishSingleFile=true /p:DebugType=None /p:IncludeNativeLibrariesForSelfExtract=true /p:AssemblyVersion=$GITVERSION_SEMVER /p:FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER /p:InformationalVersion=$GITVERSION_SEMVER
+      run: dotnet publish .//SmartThingsTerminal//SmartThingsTerminal.csproj -o publish/v$GITVERSION_SEMVER/${{ matrix.runtime }} -c Release -r ${{ matrix.runtime }} -f net6.0 --self-contained -p:PublishSingleFile=true -p:DebugType=None -p:IncludeNativeLibrariesForSelfExtract=true -p:AssemblyVersion=$GITVERSION_ASSEMBLYSEMFILEVER -p:FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER -p:InformationalVersion=$GITVERSION_SEMVER
 
     - name: Zip ${{ matrix.runtime }} release
       run: 7z a ${{ matrix.runtime }}.zip ./publish/v${{ env.GITVERSION_SEMVER }}/${{ matrix.runtime }}/*
 
     - name: Release ${{ env.GITVERSION_SEMVER }}
-      if: steps.release_check.outputs.skip_build != 'true'
+      if: github.ref == 'refs/heads/master'
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
