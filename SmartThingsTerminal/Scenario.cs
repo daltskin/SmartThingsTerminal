@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using NStack;
 using SmartThingsNet.Model;
-using SmartThingsTerminal.Scenarios;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Terminal.Gui;
@@ -43,6 +43,10 @@ namespace SmartThingsTerminal
         public Button StatusButton { get; set; }
 
         public MenuBar MenuBar { get; set; }
+
+        public string SearchText { get; set; }
+
+        public System.Timers.Timer SearchTimer { get; set; }
 
         public string FormatJson(string json)
         {
@@ -176,6 +180,7 @@ namespace SmartThingsTerminal
                 Height = 8,
                 CanFocus = false,
                 ColorScheme = Colors.TopLevel,
+              
             };
         }
 
@@ -208,6 +213,8 @@ namespace SmartThingsTerminal
                         UpdateJsonView(SelectedItem.ToJson());
                         HostPane.Title = displayItemList.Keys.ToArray()[classListView.SelectedItem];
                         UpdateSettings<T>(SelectedItem);
+
+                        Top.BringSubviewToFront(StatusBar);
                     }
                     catch (Exception)
                     {
@@ -220,9 +227,43 @@ namespace SmartThingsTerminal
                 {
                     DisableEditMode();
                 };
+
+                classListView.KeyDown += (args) =>
+                {
+                    if (!char.IsControl((char)args.KeyEvent.Key))
+                    {
+                        SearchText += args.KeyEvent.ToString();
+                    }
+
+                    if (SearchTimer == null)
+                    {
+                        SearchTimer = new System.Timers.Timer(500);
+                        SearchTimer.Elapsed += SearchTimer_Elapsed;
+                    }
+                    if (!SearchTimer.Enabled)
+                    {
+                        SearchTimer.Start();
+                    }
+                };
             }
             ClassListView = classListView;
             return classListView;
+        }
+
+        private void SearchTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            SearchTimer.Stop();
+
+            if (!string.IsNullOrEmpty(SearchText))
+            {
+                var s = (List<string>)(ClassListView.Source.ToList());
+                var i = s.FindIndex(0, s.Count, d => d.StartsWith(SearchText, StringComparison.InvariantCultureIgnoreCase));
+                if (i >= 0)
+                {
+                    Application.MainLoop.Invoke(() => { ClassListView.SelectedItem = i; });
+                }
+                SearchText = null;
+            }
         }
 
         public virtual void ExportItem()
