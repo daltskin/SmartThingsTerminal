@@ -176,6 +176,7 @@ namespace SmartThingsTerminal
                 Height = 8,
                 CanFocus = false,
                 ColorScheme = Colors.TopLevel,
+              
             };
         }
 
@@ -208,6 +209,8 @@ namespace SmartThingsTerminal
                         UpdateJsonView(SelectedItem.ToJson());
                         HostPane.Title = displayItemList.Keys.ToArray()[classListView.SelectedItem];
                         UpdateSettings<T>(SelectedItem);
+
+                        Top.BringSubviewToFront(StatusBar);
                     }
                     catch (Exception)
                     {
@@ -219,6 +222,23 @@ namespace SmartThingsTerminal
                 classListView.Enter += (args) =>
                 {
                     DisableEditMode();
+                };
+
+                classListView.KeyDown += (args) =>
+                {
+                    var s = displayItemList.Values.ToList()
+                        .FindIndex(0, displayItemList.Values.Count(), d => d.StartsWith(args.KeyEvent.ToString(), StringComparison.InvariantCultureIgnoreCase));
+
+                    if (s >= 0)
+                    {
+                        ClassListView.SelectedItem = s;
+                        classListView.SelectedItem = s;
+                        SelectedItemIndex = ClassListView.SelectedItem;
+                        SelectedItem = _dataItemList.Values.ToArray()[SelectedItemIndex];
+                        UpdateJsonView(SelectedItem.ToJson());
+                        HostPane.Title = displayItemList.Keys.ToArray()[classListView.SelectedItem];
+                        UpdateSettings<T>(SelectedItem);
+                    }
                 };
             }
             ClassListView = classListView;
