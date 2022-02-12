@@ -46,7 +46,7 @@ namespace SmartThingsTerminal.Scenarios
                 new StatusItem(Key.F2, "~F2~ Run Scene", () => RunScene()),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.F9, "~F9~ Menu", () => { }),
-                new StatusItem(Key.Home, "~Home~ Back", () => Quit())
+                new StatusItem(Key.F12, "~F12~ Back", () => Quit())
             });
         }
 

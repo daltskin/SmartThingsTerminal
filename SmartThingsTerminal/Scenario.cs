@@ -86,7 +86,7 @@ namespace SmartThingsTerminal
         {
             StatusBar = new StatusBar(new StatusItem[] {
                 new StatusItem(Key.F5, "~F5~ Refresh", () => RefreshScreen()),
-                new StatusItem(Key.Home, "~Home~ Back", () => Quit())
+                new StatusItem(Key.F12, "~F12~ Back", () => Quit())
             });
         }
 
@@ -143,6 +143,7 @@ namespace SmartThingsTerminal
 
             HostPane = new FrameView(title)
             {
+                Id = "HostPane",
                 X = Pos.Right(LeftPane),
                 Y = settingsY,
                 Width = Dim.Fill(),
@@ -156,6 +157,7 @@ namespace SmartThingsTerminal
         {
             JsonView = new TextView()
             {
+                Id = "JsonView",
                 X = 0,
                 Y = 0,
                 Width = Dim.Fill(),
@@ -442,16 +444,6 @@ namespace SmartThingsTerminal
             {
                 Top = Application.Top;
             }
-
-            Win = new Window($"CTRL-Q to Close - Scenario: {GetName()}")
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill(),
-                Height = Dim.Fill(),
-                ColorScheme = colorScheme,
-            };
-            Top.Add(Win);
 
             STClient = smartThingsClient;
         }

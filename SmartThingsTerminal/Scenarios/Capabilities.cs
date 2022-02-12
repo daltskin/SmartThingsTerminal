@@ -96,18 +96,21 @@ namespace SmartThingsTerminal.Scenarios
             SettingsPane.Add(labelId);
             var deviceId = new TextField($"{capability.Id}") { X = Pos.Right(labelId) + 1, Y = 0, Width = 40 };
             deviceId.ColorScheme = Colors.Base;
+            deviceId.ReadOnly = true;
             SettingsPane.Add(deviceId);
 
             var labelDeviceLabel = new Label("Status:") { X = 0, Y = 1 };
             SettingsPane.Add(labelDeviceLabel);
             var deviceLabel = new TextField($"{capability?.Status}") { X = Pos.Right(labelDeviceLabel) + 1, Y = 1, Width = 40 };
             deviceLabel.ColorScheme = Colors.Base;
+            deviceLabel.ReadOnly = true;
             SettingsPane.Add(deviceLabel);
 
             var labelType = new Label("Version:") { X = 0, Y = 2 };
             SettingsPane.Add(labelType);
             var deviceType = new TextField($"{capability._Version}") { X = Pos.Right(labelType) + 1, Y = 2, Width = 40 };
             deviceType.ColorScheme = Colors.Base;
+            deviceType.ReadOnly = true;
             SettingsPane.Add(deviceType);
         }
 
@@ -190,7 +193,7 @@ namespace SmartThingsTerminal.Scenarios
                 new StatusItem(Key.F1, "~F1~ Capability Details", () => ToggleCapability()),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.F9, "~F9~ Menu", () => { }),
-                new StatusItem(Key.Home, "~Home~ Back", () => Quit())
+                new StatusItem(Key.F12, "~F12~ Back", () => Quit())
             });
         }
 
