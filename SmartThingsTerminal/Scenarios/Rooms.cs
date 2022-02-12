@@ -50,7 +50,7 @@ namespace SmartThingsTerminal.Scenarios
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.F6, "~F6~ Copy Room", () => SaveItem(true)),
                 new StatusItem(Key.F7, "~F7~ Delete Room", () => DeleteItem()),
-                new StatusItem(Key.Home, "~Home~ Back", () => Quit())
+                new StatusItem(Key.F12, "~F12~ Back", () => Quit())
             });
         }
 

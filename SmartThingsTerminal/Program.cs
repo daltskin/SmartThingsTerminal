@@ -108,7 +108,7 @@ namespace SmartThingsTerminal
                 Y = 1, // for menu
                 Width = 30,
                 Height = Dim.Fill(1),
-                CanFocus = false,
+                CanFocus = true,
             };
 
             _categories = Scenario.GetAllCategories().OrderBy(c => c).ToList();
@@ -123,8 +123,10 @@ namespace SmartThingsTerminal
             };
             _categoryListView.OpenSelectedItem += (a) =>
             {
+                
                 _rightPane.SetFocus();
             };
+
             _categoryListView.SelectedItemChanged += CategoryListView_SelectedChanged;
             _leftPane.Add(_categoryListView);
 
@@ -163,7 +165,7 @@ namespace SmartThingsTerminal
             _scenarioListView.OpenSelectedItem += _scenarioListView_OpenSelectedItem;
             _rightPane.Add(_scenarioListView);
 
-            _categoryListView.SelectedItem = _categoryListViewItem;
+            //_categoryListView.SelectedItem = _categoryListViewItem;
             _categoryListView.OnSelectedChanged();
 
             _capslock = new StatusItem(Key.CharMask, "Caps", null);
@@ -199,19 +201,11 @@ namespace SmartThingsTerminal
             _top.Add(_appTitlePane);
             _top.Add(_rightPane);
             _top.Add(_statusBar);
-            //_top.Loaded += () =>
-            //{
-            //    if (_runningScenario != null)
-            //    {
-            //        // _top.SetFocus(_rightPane);
-            //        _runningScenario = null;
-            //    }
-            //};
+            _top.CanFocus = true;
             _top.Ready += () =>
             {
                 if (_runningScenario != null)
                 {
-                    // _top.SetFocus(_rightPane);
                     _runningScenario = null;
                 }
             };
@@ -242,9 +236,11 @@ namespace SmartThingsTerminal
 
             public int Count => Scenarios.Count;
 
+            public int Length => Scenarios.Count;
+
             public ScenarioListDataSource(List<Type> itemList) => Scenarios = itemList;
 
-            public void Render(ListView container, ConsoleDriver driver, bool selected, int item, int col, int line, int width)
+            public void Render(ListView container, ConsoleDriver driver, bool selected, int item, int col, int line, int width, int start = 0)
             {
                 container.Move(col, line);
                 // Equivalent to an interpolated string like $"{Scenarios[item].Name, -widtestname}"; if such a thing were possible

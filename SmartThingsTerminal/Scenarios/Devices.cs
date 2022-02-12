@@ -79,25 +79,29 @@ namespace SmartThingsTerminal.Scenarios
         {
             SettingsPane = new FrameView("Settings")
             {
+                Id = "Settings",
                 X = Pos.Right(LeftPane),
                 Y = 1, // for menu
                 Width = Dim.Fill(),
                 Height = 8,
-                CanFocus = false,
+                CanFocus = true,
                 ColorScheme = Colors.TopLevel,
             };
 
             _deviceDetailsFrame = new FrameView("Device Details")
             {
+                Id = "Device_Details",
                 X = 0,
                 Y = 0,
                 Height = 6,
                 Width = Dim.Percent(50),
+                CanFocus = true,
             };
             SettingsPane.Add(_deviceDetailsFrame);
 
             _deviceLocationFrame = new FrameView("Device Location")
             {
+                Id = "Device_Location",
                 X = Pos.Right(_deviceDetailsFrame),
                 Y = Pos.Y(_deviceDetailsFrame),
                 Height = 6,
@@ -111,31 +115,34 @@ namespace SmartThingsTerminal.Scenarios
         public override void UpdateSettings<T>(object selectedItem)
         {
             Device device = (Device)selectedItem;
-
             _deviceDetailsFrame.RemoveAll();
 
             var labelId = new Label("Id:") { X = 0, Y = 0 };
             _deviceDetailsFrame.Add(labelId);
             var deviceId = new TextField($"{device.DeviceId}") { X = Pos.Right(labelId) + 1, Y = 0, Width = 40 };
             deviceId.ColorScheme = Colors.Base;
+            deviceId.ReadOnly = true;
             _deviceDetailsFrame.Add(deviceId);
 
             var labelDeviceLabel = new Label("Label:") { X = 0, Y = 1 };
             _deviceDetailsFrame.Add(labelDeviceLabel);
             var deviceLabel = new TextField($"{device?.Label}") { X = Pos.Right(labelDeviceLabel) + 1, Y = 1, Width = 40 };
             deviceLabel.ColorScheme = Colors.Base;
+            deviceLabel.ReadOnly = true;
             _deviceDetailsFrame.Add(deviceLabel);
 
             var labelType = new Label("Type:") { X = 0, Y = 2 };
             _deviceDetailsFrame.Add(labelType);
             var deviceType = new TextField($"{device.DeviceTypeName?.Trim()}") { X = Pos.Right(labelType) + 1, Y = 2, Width = 40 };
             deviceType.ColorScheme = Colors.Base;
+            deviceType.ReadOnly = true;
             _deviceDetailsFrame.Add(deviceType);
 
             var labelComponents = new Label("Components:") { X = 0, Y = 3 };
             _deviceDetailsFrame.Add(labelComponents);
             var deviceComponents = new TextField($"{device.Components.Count}") { X = Pos.Right(labelComponents) + 1, Y = 3, Width = 40 };
             deviceComponents.ColorScheme = Colors.Base;
+            deviceComponents.ReadOnly= true;
             _deviceDetailsFrame.Add(deviceComponents);
 
             // Device Location pane
@@ -156,6 +163,7 @@ namespace SmartThingsTerminal.Scenarios
             var labelLocation = new Label("Location:") { X = 0, Y = 0 };
             _deviceLocationFrame.Add(labelLocation);
             var deviceLocation = new TextField($"{locationName}") { X = Pos.Right(labelLocation) + 1, Y = 0, Width = 40 };
+            deviceLocation.ReadOnly= true;
             deviceLocation.ColorScheme = Colors.Base;
             _deviceLocationFrame.Add(deviceLocation);
 
@@ -163,7 +171,14 @@ namespace SmartThingsTerminal.Scenarios
             _deviceLocationFrame.Add(labelRoom);
             var deviceRoom = new TextField($"{roomName}") { X = Pos.Right(labelRoom) + 1, Y = 1, Width = 40 };
             deviceRoom.ColorScheme = Colors.Base;
+            deviceRoom.ReadOnly= true;
             _deviceLocationFrame.Add(deviceRoom);
+
+            if (_componentFrame != null)
+            {
+                ToggleComponentStatus();
+            }
+
         }
 
         public override void ConfigureStatusBar()
@@ -173,7 +188,7 @@ namespace SmartThingsTerminal.Scenarios
                 new StatusItem(Key.F4, "~F4~ Toggle Device Switch", () => ToggleDevice()),
                 new StatusItem(Key.F5, "~F5~ Refresh Data", () => RefreshScreen()),
                 new StatusItem(Key.F9, "~F9~ Menu", () => { }),
-                new StatusItem(Key.Home, "~Home~ Back", () => Quit())
+                new StatusItem(Key.F12, "~F12~ Back", () => Quit())
             });
         }
 
