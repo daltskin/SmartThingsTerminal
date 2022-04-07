@@ -410,12 +410,12 @@ namespace SmartThingsTerminal
             return _rulesApi.DeleteRule(_accessToken, ruleId, locationId);
         }
 
-        public Location UpdateLocation(string locationId, UpdateLocationRequest locationRequest)
+        public UpdateLocationResponse UpdateLocation(string locationId, UpdateLocationRequest locationRequest)
         {
             return _locationsApi.UpdateLocation(_accessToken, locationId, locationRequest);
         }
 
-        public Location CreateLocation(CreateLocationRequest locationRequest)
+        public CreateLocationResponse CreateLocation(CreateLocationRequest locationRequest)
         {
             return _locationsApi.CreateLocation(_accessToken, locationRequest);
         }
