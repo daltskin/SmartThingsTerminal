@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30204.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartThingsTerminal", "SmartThingsTerminal\SmartThingsTerminal.csproj", "{9DF95721-8429-48A4-BFA7-8F1C006E8322}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8AB9BD79-B877-4441-B6A4-88F1F71EE4E2}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
@@ -22,16 +20,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{0A86A10D-D
 		docs\pat.png = docs\pat.png
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartThingsTerminal", "SmartThingsTerminal\SmartThingsTerminal.csproj", "{6798844B-65D3-4747-90B4-2186EE664C97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9DF95721-8429-48A4-BFA7-8F1C006E8322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9DF95721-8429-48A4-BFA7-8F1C006E8322}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9DF95721-8429-48A4-BFA7-8F1C006E8322}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9DF95721-8429-48A4-BFA7-8F1C006E8322}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6798844B-65D3-4747-90B4-2186EE664C97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6798844B-65D3-4747-90B4-2186EE664C97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6798844B-65D3-4747-90B4-2186EE664C97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6798844B-65D3-4747-90B4-2186EE664C97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
