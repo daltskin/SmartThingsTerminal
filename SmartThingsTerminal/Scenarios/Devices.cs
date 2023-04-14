@@ -29,7 +29,7 @@ namespace SmartThingsTerminal.Scenarios
             Dictionary<string, string> displayItemList = null;
             try
             {
-                if (STClient.GetAllDevices().Items?.Count > 0)
+                if (STClient.GetAllDevices()?.Items?.Count > 0)
                 {
                     dataItemList = STClient.GetAllDevices().Items
                         .OrderBy(t => t.Label)
