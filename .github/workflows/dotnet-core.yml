@@ -34,7 +34,15 @@ jobs:
     - uses: actions/checkout@v2
     - name: Fetch all history for all tags and branches
       run: git fetch --prune --unshallow   
-        
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: | 
+          3.1.x
+          5.0.x
+          6.0.101
+
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.11
       with:
@@ -46,11 +54,6 @@ jobs:
     - name: Display version
       run: |
        echo "SemVer: $GITVERSION_SEMVER"
-
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.101
 
     - name: Install dependencies
       run: dotnet restore
